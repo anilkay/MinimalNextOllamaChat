@@ -46,6 +46,28 @@ yarn dev
 
 5. Open [http://localhost:3000](http://localhost:3000) with your browser
 
+## Docker Instructions
+
+## Prerequisites
+Make sure you have [Docker](https://www.docker.com/) installed on your machine.
+
+## Building the Docker Image
+To build the Docker image for the application, run the following command in the root of your project:
+
+```bash
+docker build -t minimalnextollamachat .
+```
+
+## Running the Docker Container
+Once the image is built, you can run the container using:
+
+```bash
+docker run -p 3000:3000 minimalnextollamachat
+```
+
+## Accessing the Application
+After running the container, you can access the application at `http://localhost:3000`. 
+
 ## Usage
 
 ### Chat Interface
