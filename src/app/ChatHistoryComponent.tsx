@@ -2,7 +2,7 @@
 import {ChatHistory} from "@/app/page";
 import {FC} from "react";
 
-const exportChatHistory = (chatHistory: any[]) => {
+const exportChatHistory = (chatHistory: ChatHistory[]) => {
     const json = JSON.stringify(chatHistory, null, 2);
     const blob = new Blob([json], { type: 'application/json' });
     const url = URL.createObjectURL(blob);

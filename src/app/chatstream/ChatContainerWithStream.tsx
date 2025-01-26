@@ -1,11 +1,9 @@
 "use client";
 
 import { memo, useRef, useState, useCallback, useEffect } from "react";
-import { useChatContext } from "../ChatContext";
 import { ChatHistoryComponent } from "../ChatHistoryComponent";
 import { ChatHistory } from "../page";
 import { SendMessageComponent } from "../SendMessageComponent";
-import { MakeChatRequest, ChatMessageWithRoles } from "../Services/OllamaService";
 
 
 
@@ -20,7 +18,6 @@ function ChatContainerWithStream({ selectedModel }: ChatContainerProps) {
     const chatHistory = useRef<ChatHistory[]>([]);
     const messageCount = useRef(0);
     const [chatUpdate, setChatUpdate] = useState(0);
-    const {temperature}=useChatContext()
 
     const sendMessage = useCallback(async (message: string) => {
         if (!selectedModel) {
