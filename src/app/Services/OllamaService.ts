@@ -134,5 +134,13 @@ export async function DeleteModel(modelName:string){
 
 
 function GetApiEndpoint(){
-        return "http://localhost:11434"
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL; // Ortam değişkenini al
+
+    console.log(apiBaseUrl); // Değeri logla
+
+    if (!apiBaseUrl) {
+        return "http://localhost:11434"; // Varsayılan değer döndür
+    }
+
+    return apiBaseUrl;
 }

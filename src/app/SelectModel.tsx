@@ -7,7 +7,7 @@ export function SelectModel({ onSelectAction }: { onSelectAction: (model: string
     const [models, setModels] = useState<Model[]|undefined>([]);
     const [loading, setLoading] = useState(true);
     const [selectedModel, setSelectedModel] = useState("")
-    const [error, setError] = useState<string>('');
+    const error= null
 
     useEffect(() => {
         GetModels().then( (result)=>{

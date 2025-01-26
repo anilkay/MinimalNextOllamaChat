@@ -3,7 +3,6 @@
 import { memo, useCallback } from "react";
 import { useChatContext } from "./ChatContext";
 
-interface MessageInputProps {}
 
 const MessageInput = memo(function MessageInput() {
     const { inputValue, setInputValue } = useChatContext();

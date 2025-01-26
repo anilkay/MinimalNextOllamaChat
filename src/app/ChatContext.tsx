@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useCallback, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode } from 'react';
 
 interface ChatContextType {
     inputValue: string;
