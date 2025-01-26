@@ -3,7 +3,7 @@
 import { memo, useCallback, useRef, useState, useEffect } from "react";
 import { ChatHistoryComponent } from "./ChatHistoryComponent";
 import { SendMessageComponent } from "./SendMessageComponent";
-import { MakeChatRequest } from "./Services/OllamaService";
+import { ChatMessageWithRoles, MakeChatRequest } from "./Services/OllamaService";
 import { ChatHistory } from "./page";
 import { ChatProvider } from "./ChatContext";
 
@@ -29,12 +29,17 @@ function ChatContainer({ selectedModel }: ChatContainerProps) {
             message: message,
             sender: "You",
             messageNumber: messageCount.current,
+            role: "user"
         });
         setChatUpdate((prev) => prev + 1);
 
         MakeChatRequest(
             selectedModel,
-            chatHistory.current.map((history) => history.message)
+            chatHistory.current.map((history) =>  
+            {
+              const chatResponseModel:ChatMessageWithRoles= {message:history.message,role:history.role}
+              return chatResponseModel
+            })
         ).then(function (result) {
             const chatMessageResponse = result.data?.message;
             const chatResponseModel = result.data?.model;
@@ -42,6 +47,7 @@ function ChatContainer({ selectedModel }: ChatContainerProps) {
                 message: chatMessageResponse?.content ?? "",
                 sender: chatResponseModel ?? "",
                 messageNumber: messageCount.current,
+                role: 'assistant'
             });
             messageCount.current += 1;
             setChatUpdate((prev) => prev + 1);

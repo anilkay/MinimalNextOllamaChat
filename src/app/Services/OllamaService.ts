@@ -18,6 +18,12 @@ export interface Details {
     parameter_size: string;
     quantization_level: string;
 }
+
+export interface ChatMessageWithRoles {
+    message: string,
+    role: 'user' | 'assistant'
+}
+
 export async function GetModels(){
 
     const ollamaEndpoint=GetApiEndpoint();
@@ -59,10 +65,10 @@ interface Message {
     content: string;
 }
 
-export async function MakeChatRequest(modelName:string,chatMessages:string[]){
+export async function MakeChatRequest(modelName:string,chatMessages:ChatMessageWithRoles[]){
     const ollamaEndpoint=GetApiEndpoint();
 
-    const messages=chatMessages.map((message:string)=>{return {role:"user",content:message}});
+    const messages=chatMessages.map((chatMessage:ChatMessageWithRoles)=>{return {role:chatMessage.role,content:chatMessage.message}});
     const MakeChatRequestFullUrl=ollamaEndpoint+"/api/chat";
     try {
 
