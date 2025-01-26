@@ -65,7 +65,7 @@ interface Message {
     content: string;
 }
 
-export async function MakeChatRequest(modelName:string,chatMessages:ChatMessageWithRoles[]){
+export async function MakeChatRequest(temperature:number,modelName:string,chatMessages:ChatMessageWithRoles[]){
     const ollamaEndpoint=GetApiEndpoint();
 
     const messages=chatMessages.map((chatMessage:ChatMessageWithRoles)=>{return {role:chatMessage.role,content:chatMessage.message}});
@@ -78,7 +78,7 @@ export async function MakeChatRequest(modelName:string,chatMessages:ChatMessageW
             headers:{
                 "Content-Type":"application/json",
             },
-            body:JSON.stringify({model:modelName,stream:false,messages:[...messages]}),
+            body:JSON.stringify({options:{temperature:temperature},model:modelName,stream:false,messages:[...messages]}),
         });
         const data=await response.json();
         return {data: data as ChatMessageResponse,error:false};

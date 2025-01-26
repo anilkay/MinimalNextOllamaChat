@@ -5,7 +5,7 @@ import { ChatHistoryComponent } from "./ChatHistoryComponent";
 import { SendMessageComponent } from "./SendMessageComponent";
 import { ChatMessageWithRoles, MakeChatRequest } from "./Services/OllamaService";
 import { ChatHistory } from "./page";
-import { ChatProvider } from "./ChatContext";
+import { useChatContext } from "./ChatContext";
 
 const MemoizedChatHistory = memo(ChatHistoryComponent);
 const MemoizedSendMessage = memo(SendMessageComponent);
@@ -18,6 +18,7 @@ function ChatContainer({ selectedModel }: ChatContainerProps) {
     const chatHistory = useRef<ChatHistory[]>([]);
     const messageCount = useRef(0);
     const [chatUpdate, setChatUpdate] = useState(0);
+    const {temperature}=useChatContext()
 
     const sendMessage = useCallback((message: string) => {
         if (!selectedModel) {
@@ -34,6 +35,7 @@ function ChatContainer({ selectedModel }: ChatContainerProps) {
         setChatUpdate((prev) => prev + 1);
 
         MakeChatRequest(
+            temperature,
             selectedModel,
             chatHistory.current.map((history) =>  
             {
@@ -61,7 +63,6 @@ function ChatContainer({ selectedModel }: ChatContainerProps) {
     }, [selectedModel]);
 
     return (
-        <ChatProvider>
             <div className="flex flex-col h-full">
                 <div className="h-[60vh] overflow-y-auto bg-gradient-to-b from-gray-800/50 via-gray-900/50 to-gray-800/50">
                     <div className="max-w-3xl mx-auto px-4">
@@ -74,7 +75,6 @@ function ChatContainer({ selectedModel }: ChatContainerProps) {
                     </div>
                 </div>
             </div>
-        </ChatProvider>
     );
 }
 

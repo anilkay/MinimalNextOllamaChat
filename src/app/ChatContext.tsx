@@ -5,16 +5,21 @@ import { createContext, useContext, useState, ReactNode } from 'react';
 interface ChatContextType {
     inputValue: string;
     setInputValue: (value: string) => void;
+    temperature:number,
+    setTemperature: (value: number)=> void
 }
 
 const ChatContext = createContext<ChatContextType | null>(null);
 
 export function ChatProvider({ children }: { children: ReactNode }) {
     const [inputValue, setInputValue] = useState("");
+    const [temperature,setTemperature]=useState(0.7)
 
     const contextValue = {
         inputValue,
-        setInputValue
+        setInputValue,
+        temperature,
+        setTemperature
     };
 
     return (
