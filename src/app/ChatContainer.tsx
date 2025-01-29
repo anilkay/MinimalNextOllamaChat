@@ -43,6 +43,19 @@ function ChatContainer({ selectedModel }: ChatContainerProps) {
               return chatResponseModel
             })
         ).then(function (result) {
+            console.log(result);
+            if(result.error){
+                chatHistory.current.push({
+                    message: "Error making chat request",
+                    sender: "assistant",
+                    messageNumber: messageCount.current,
+                    role: "user"
+                })
+                messageCount.current += 1;
+                setChatUpdate((prev) => prev + 1);
+                return;
+            }
+            
             const chatMessageResponse = result.data?.message;
             const chatResponseModel = result.data?.model;
             chatHistory.current.push({

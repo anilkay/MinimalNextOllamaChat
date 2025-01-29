@@ -4,8 +4,7 @@ import { memo, useRef, useState, useCallback, useEffect } from "react";
 import { ChatHistoryComponent } from "../ChatHistoryComponent";
 import { ChatHistory } from "../page";
 import { SendMessageComponent } from "../SendMessageComponent";
-
-
+import { ChatMessageResponse } from '../Services/OllamaService';
 
 const MemoizedChatHistory = memo(ChatHistoryComponent);
 const MemoizedSendMessage = memo(SendMessageComponent);
@@ -52,6 +51,25 @@ function ChatContainerWithStream({ selectedModel }: ChatContainerProps) {
           if(!response.body){
             return;
           }
+
+          console.log(response);
+          console.log("status",response.status)
+
+          if(response.status!=200){
+            const errorResponse=await response.json() as ChatMessageResponse
+
+            chatHistory.current.push({
+              message: "Error making chat request",
+              sender:"Ollama",
+              messageNumber: messageCount.current,
+              role: "assistant"
+            });
+
+            messageCount.current += 1;
+            setChatUpdate((prev) => prev + 1);
+            return;
+          }
+
           const reader = response.body.getReader();
           let accumulatedMessage = '';
           chatHistory.current.push({

@@ -47,7 +47,7 @@ export async function GetModels(){
     }
 }
 
-interface ChatMessageResponse {
+export interface ChatMessageResponse {
     model: string;
     created_at: string;
     message: Message;
@@ -81,7 +81,8 @@ export async function MakeChatRequest(temperature:number,modelName:string,chatMe
             body:JSON.stringify({options:{temperature:temperature},model:modelName,stream:false,messages:[...messages]}),
         });
         const data=await response.json();
-        return {data: data as ChatMessageResponse,error:false};
+
+        return {data: data as ChatMessageResponse,error:response.status!=200};
 
     }
     catch(e){
