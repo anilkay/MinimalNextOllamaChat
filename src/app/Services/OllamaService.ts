@@ -65,20 +65,32 @@ interface Message {
     content: string;
 }
 
-export async function MakeChatRequest(temperature:number,modelName:string,chatMessages:ChatMessageWithRoles[]){
-    const ollamaEndpoint=GetApiEndpoint();
+const toBase64 = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = (error) => reject(error);
+    });
 
+
+export async function MakeChatRequest(temperature:number,modelName:string,chatMessages:ChatMessageWithRoles[],image:File|null){
+    const ollamaEndpoint=GetApiEndpoint();
     const messages=chatMessages.map((chatMessage:ChatMessageWithRoles)=>{return {role:chatMessage.role,content:chatMessage.message}});
     const MakeChatRequestFullUrl=ollamaEndpoint+"/api/chat";
     try {
-
+        const images:string[]=[]
+        if(image){
+            const base64Image=await toBase64(image);
+            images.push(base64Image);
+        }
 
         const response=await fetch(MakeChatRequestFullUrl,{
             method:"POST",
             headers:{
                 "Content-Type":"application/json",
             },
-            body:JSON.stringify({options:{temperature:temperature},model:modelName,stream:false,messages:[...messages]}),
+            body:JSON.stringify({options:{temperature:temperature},model:modelName,stream:false,messages:[...messages],images:images}),
         });
         const data=await response.json();
 

@@ -3,10 +3,9 @@
 import { memo, useCallback, useRef, useState, useEffect } from "react";
 import { ChatHistoryComponent } from "./ChatHistoryComponent";
 import { SendMessageComponent } from "./SendMessageComponent";
-import { ChatMessageWithRoles, MakeChatRequest } from "./Services/OllamaService";
+import { MakeChatRequest } from "./Services/OllamaService";
 import { ChatHistory } from "./page";
 import { useChatContext } from "./ChatContext";
-import { toast } from "react-toastify";
 import { showToast } from "./utils/ToastUtils";
 
 const MemoizedChatHistory = memo(ChatHistoryComponent);
@@ -22,7 +21,7 @@ function ChatContainer({ selectedModel }: ChatContainerProps) {
     const [chatUpdate, setChatUpdate] = useState(0);
     const {temperature}=useChatContext()
 
-    const sendMessage = useCallback((message: string) => {
+    const sendMessage = useCallback(({ message, image }: { message: string; image: File | null }) => {
         if (!selectedModel) {
             showToast('error', "Please select a model first");
             return;
@@ -32,18 +31,16 @@ function ChatContainer({ selectedModel }: ChatContainerProps) {
             message: message,
             sender: "You",
             messageNumber: messageCount.current,
-            role: "user"
+            role: "user",
+            image: image,
         });
         setChatUpdate((prev) => prev + 1);
 
         MakeChatRequest(
             temperature,
             selectedModel,
-            chatHistory.current.map((history) =>  
-            {
-              const chatResponseModel:ChatMessageWithRoles= {message:history.message,role:history.role}
-              return chatResponseModel
-            })
+            chatHistory.current,
+            image
         ).then(function (result) {
             console.log(result);
             if(result.error){
@@ -69,7 +66,7 @@ function ChatContainer({ selectedModel }: ChatContainerProps) {
             messageCount.current += 1;
             setChatUpdate((prev) => prev + 1);
         });
-    }, [selectedModel]);
+    }, [selectedModel, temperature]);
 
     useEffect(() => {
         chatHistory.current = [];
