@@ -5,6 +5,8 @@ import { ChatHistoryComponent } from "../ChatHistoryComponent";
 import { ChatHistory } from "../page";
 import { SendMessageComponent } from "../SendMessageComponent";
 import { ChatMessageResponse } from '../Services/OllamaService';
+import { toast } from 'react-toastify';
+import { showToast } from "../utils/ToastUtils";
 
 const MemoizedChatHistory = memo(ChatHistoryComponent);
 const MemoizedSendMessage = memo(SendMessageComponent);
@@ -20,7 +22,7 @@ function ChatContainerWithStream({ selectedModel }: ChatContainerProps) {
 
     const sendMessage = useCallback(async (message: string) => {
         if (!selectedModel) {
-            alert("Please select a model first");
+            showToast('error', "Please select a model first");
             return;
         }
 
