@@ -19,7 +19,7 @@ function ChatContainer({ selectedModel }: ChatContainerProps) {
     const chatHistory = useRef<ChatHistory[]>([]);
     const messageCount = useRef(0);
     const [chatUpdate, setChatUpdate] = useState(0);
-    const {temperature}=useChatContext()
+    const {temperature,seedValue,seedUsage}=useChatContext()
 
     const sendMessage = useCallback(async({ message, image }: { message: string; image: File | null }) => {
         if (!selectedModel) {
@@ -48,6 +48,8 @@ function ChatContainer({ selectedModel }: ChatContainerProps) {
 
         MakeChatRequest(
             temperature,
+            seedUsage,
+            seedValue,
             selectedModel,
             chatHistory.current,
         ).then(function (result) {

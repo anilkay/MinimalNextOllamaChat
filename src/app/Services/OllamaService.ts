@@ -25,6 +25,12 @@ export interface ChatMessageWithRoles {
     images: string[] | null
 }
 
+interface  OptionsType {
+    temperature: number
+    seed?: number
+}
+
+
 export async function GetModels(){
 
     const ollamaEndpoint=GetApiEndpoint();
@@ -85,20 +91,23 @@ export const toBase64 = (file: File): Promise<string> =>
     });
 
 
-export async function MakeChatRequest(temperature:number,modelName:string,chatMessages:ChatMessageWithRoles[]){
+export async function MakeChatRequest(temperature:number,seedUsage:boolean,seedValue:number,modelName:string,chatMessages:ChatMessageWithRoles[]){
     const ollamaEndpoint=GetApiEndpoint();
     const messages:ChatMessageMessageRequest[] =chatMessages.map((chatMessage:ChatMessageWithRoles)=>{return {role:chatMessage.role,content:chatMessage.message,images:chatMessage.images}});
     const MakeChatRequestFullUrl=ollamaEndpoint+"/api/chat";
     try {
-       
-
+        const options:OptionsType={temperature:temperature};
+        
+        if(seedUsage){
+            options["seed"]=seedValue;
+        }
 
         const response=await fetch(MakeChatRequestFullUrl,{
             method:"POST",
             headers:{
                 "Content-Type":"application/json",
             },
-            body:JSON.stringify({options:{temperature:temperature},model:modelName,stream:false,messages:[...messages]}),
+            body:JSON.stringify({options:options,model:modelName,stream:false,messages:messages}),
         });
         const data=await response.json();
 
