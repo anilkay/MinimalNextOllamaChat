@@ -4,7 +4,7 @@ import { memo, useRef, useState, useCallback, useEffect } from "react";
 import { ChatHistoryComponent } from "../components/ChatHistoryComponent";
 import { ChatHistory } from "../page";
 import { SendMessageComponent } from "../components/SendMessageComponent";
-import { ChatMessageResponse } from '../Services/OllamaService';
+import { ChatMessageResponse, toBase64 } from '../Services/OllamaService';
 import { toast } from 'react-toastify';
 import { showToast } from "../utils/ToastUtils";
 
@@ -20,17 +20,26 @@ function ChatContainerWithStream({ selectedModel }: ChatContainerProps) {
     const messageCount = useRef(0);
     const [chatUpdate, setChatUpdate] = useState(0);
 
-    const sendMessage = useCallback(async (message: string) => {
+    const sendMessage = useCallback(async({ message, image }: { message: string; image: File | null }) => {
         if (!selectedModel) {
             showToast('error', "Please select a model first");
             return;
+        }
+
+        let images:string[] |null |undefined=null
+        
+        if(image){
+            images=[]
+            const base64Image=await toBase64(image);
+            images.push(base64Image);
         }
 
         chatHistory.current.push({
             message: message,
             sender: "You",
             messageNumber: messageCount.current,
-            role: "user"
+            role: "user",
+            images: images,
         });
         setChatUpdate((prev) => prev + 1);
 
@@ -45,6 +54,7 @@ function ChatContainerWithStream({ selectedModel }: ChatContainerProps) {
                 {
                   role: 'user',
                   content: message,
+                  images: images
                 },
               ],
               stream: true, // Enable streaming
@@ -64,7 +74,8 @@ function ChatContainerWithStream({ selectedModel }: ChatContainerProps) {
               message: "Error making chat request",
               sender:"Ollama",
               messageNumber: messageCount.current,
-              role: "assistant"
+              role: "assistant",
+              images: null
             });
 
             messageCount.current += 1;
@@ -78,7 +89,8 @@ function ChatContainerWithStream({ selectedModel }: ChatContainerProps) {
             message: accumulatedMessage,
             sender:"Ollama",
             messageNumber: messageCount.current,
-            role: "assistant"
+            role: "assistant",
+            images: null
           });
           while (true) {
             const { done, value } = await reader.read();
