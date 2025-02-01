@@ -29,7 +29,7 @@ const SendMessageComponent = memo(function SendMessageComponent({
                 fileInputRef.current.value = "";
             }
         }
-    }, [inputValue, onSendChatMessageAction, image]);
+    }, [inputValue, onSendChatMessageAction, image,setInputValue]);
 
     return (
         <div className="flex flex-col h-full gap-4">

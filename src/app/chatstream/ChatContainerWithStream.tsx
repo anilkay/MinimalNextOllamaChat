@@ -5,7 +5,6 @@ import { ChatHistoryComponent } from "../components/ChatHistoryComponent";
 import { ChatHistory } from "../page";
 import { SendMessageComponent } from "../components/SendMessageComponent";
 import { ChatMessageResponse, OptionsType, toBase64 } from '../Services/OllamaService';
-import { toast } from 'react-toastify';
 import { showToast } from "../utils/ToastUtils";
 import { useChatContext } from "../ChatContext";
 
@@ -46,7 +45,7 @@ function ChatContainerWithStream({ selectedModel }: ChatContainerProps) {
         setChatUpdate((prev) => prev + 1);
 
         const options:OptionsType={temperature:temperature};
-        
+
         if(seedUsage){
             options["seed"]=seedValue;
         }
@@ -80,7 +79,7 @@ function ChatContainerWithStream({ selectedModel }: ChatContainerProps) {
             const errorResponse=await response.json() as ChatMessageResponse
 
             chatHistory.current.push({
-              message: "Error making chat request",
+              message: "Error making chat request "+errorResponse.message,
               sender:"Ollama",
               messageNumber: messageCount.current,
               role: "assistant",
