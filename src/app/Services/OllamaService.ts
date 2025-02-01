@@ -22,7 +22,7 @@ export interface Details {
 export interface ChatMessageWithRoles {
     message: string,
     role: 'user' | 'assistant'
-    image?: File | null
+    images: string[] | null
 }
 
 export async function GetModels(){
@@ -51,7 +51,7 @@ export async function GetModels(){
 export interface ChatMessageMessageRequest {
     content: string;
     role: 'user' | 'assistant'
-    images?: string[]
+    images?: string[] | null
 }
 
 export interface ChatMessageResponse {
@@ -72,7 +72,7 @@ interface Message {
     content: string;
 }
 
-const toBase64 = (file: File): Promise<string> =>
+export const toBase64 = (file: File): Promise<string> =>
     new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
@@ -85,18 +85,13 @@ const toBase64 = (file: File): Promise<string> =>
     });
 
 
-export async function MakeChatRequest(temperature:number,modelName:string,chatMessages:ChatMessageWithRoles[],image:File|null){
+export async function MakeChatRequest(temperature:number,modelName:string,chatMessages:ChatMessageWithRoles[]){
     const ollamaEndpoint=GetApiEndpoint();
-    const messages:ChatMessageMessageRequest[] =chatMessages.map((chatMessage:ChatMessageWithRoles)=>{return {role:chatMessage.role,content:chatMessage.message}});
+    const messages:ChatMessageMessageRequest[] =chatMessages.map((chatMessage:ChatMessageWithRoles)=>{return {role:chatMessage.role,content:chatMessage.message,images:chatMessage.images}});
     const MakeChatRequestFullUrl=ollamaEndpoint+"/api/chat";
     try {
-        const images:string[]=[]
-        if(image){
-            const base64Image=await toBase64(image);
-            images.push(base64Image);
-        }
+       
 
-        messages[messages.length - 1].images = images;
 
         const response=await fetch(MakeChatRequestFullUrl,{
             method:"POST",

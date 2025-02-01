@@ -3,7 +3,7 @@
 import { memo, useCallback, useRef, useState, useEffect } from "react";
 import { ChatHistoryComponent } from "./ChatHistoryComponent";
 import { SendMessageComponent } from "./SendMessageComponent";
-import { MakeChatRequest } from "./Services/OllamaService";
+import { MakeChatRequest, toBase64 } from "./Services/OllamaService";
 import { ChatHistory } from "./page";
 import { useChatContext } from "./ChatContext";
 import { showToast } from "./utils/ToastUtils";
@@ -21,10 +21,18 @@ function ChatContainer({ selectedModel }: ChatContainerProps) {
     const [chatUpdate, setChatUpdate] = useState(0);
     const {temperature}=useChatContext()
 
-    const sendMessage = useCallback(({ message, image }: { message: string; image: File | null }) => {
+    const sendMessage = useCallback(async({ message, image }: { message: string; image: File | null }) => {
         if (!selectedModel) {
             showToast('error', "Please select a model first");
             return;
+        }
+
+        let images:string[] |null |undefined=null
+        
+        if(image){
+            images=[]
+            const base64Image=await toBase64(image);
+            images.push(base64Image);
         }
 
         chatHistory.current.push({
@@ -32,15 +40,16 @@ function ChatContainer({ selectedModel }: ChatContainerProps) {
             sender: "You",
             messageNumber: messageCount.current,
             role: "user",
-            image: image,
+            images: images,
         });
         setChatUpdate((prev) => prev + 1);
+
+        
 
         MakeChatRequest(
             temperature,
             selectedModel,
             chatHistory.current,
-            image
         ).then(function (result) {
             console.log(result);
             if(result.error){
@@ -48,7 +57,8 @@ function ChatContainer({ selectedModel }: ChatContainerProps) {
                     message: "Error making chat request",
                     sender: "assistant",
                     messageNumber: messageCount.current,
-                    role: "user"
+                    role: "user",
+                    images: null
                 })
                 messageCount.current += 1;
                 setChatUpdate((prev) => prev + 1);
@@ -61,7 +71,8 @@ function ChatContainer({ selectedModel }: ChatContainerProps) {
                 message: chatMessageResponse?.content ?? "",
                 sender: chatResponseModel ?? "",
                 messageNumber: messageCount.current,
-                role: 'assistant'
+                role: 'assistant',
+                images:null
             });
             messageCount.current += 1;
             setChatUpdate((prev) => prev + 1);

@@ -15,7 +15,7 @@ export interface ChatHistory {
     sender: string;
     messageNumber: number;
     role: 'user' | 'assistant'
-    image?: File | null
+    images: string[] | null
 }
 
 export default function Home() {
