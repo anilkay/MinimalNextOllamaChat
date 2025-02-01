@@ -22,6 +22,7 @@ export interface Details {
 export interface ChatMessageWithRoles {
     message: string,
     role: 'user' | 'assistant'
+    image?: File | null
 }
 
 export async function GetModels(){
@@ -47,6 +48,12 @@ export async function GetModels(){
     }
 }
 
+export interface ChatMessageMessageRequest {
+    content: string;
+    role: 'user' | 'assistant'
+    images?: string[]
+}
+
 export interface ChatMessageResponse {
     model: string;
     created_at: string;
@@ -69,14 +76,18 @@ const toBase64 = (file: File): Promise<string> =>
     new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result as string);
+        reader.onload = () => {
+            const base64String = reader.result as string;
+            const base64Data = base64String.split(',')[1]; // Get only the data part
+            resolve(base64Data);
+        };
         reader.onerror = (error) => reject(error);
     });
 
 
 export async function MakeChatRequest(temperature:number,modelName:string,chatMessages:ChatMessageWithRoles[],image:File|null){
     const ollamaEndpoint=GetApiEndpoint();
-    const messages=chatMessages.map((chatMessage:ChatMessageWithRoles)=>{return {role:chatMessage.role,content:chatMessage.message}});
+    const messages:ChatMessageMessageRequest[] =chatMessages.map((chatMessage:ChatMessageWithRoles)=>{return {role:chatMessage.role,content:chatMessage.message}});
     const MakeChatRequestFullUrl=ollamaEndpoint+"/api/chat";
     try {
         const images:string[]=[]
@@ -85,12 +96,14 @@ export async function MakeChatRequest(temperature:number,modelName:string,chatMe
             images.push(base64Image);
         }
 
+        messages[messages.length - 1].images = images;
+
         const response=await fetch(MakeChatRequestFullUrl,{
             method:"POST",
             headers:{
                 "Content-Type":"application/json",
             },
-            body:JSON.stringify({options:{temperature:temperature},model:modelName,stream:false,messages:[...messages],images:images}),
+            body:JSON.stringify({options:{temperature:temperature},model:modelName,stream:false,messages:[...messages]}),
         });
         const data=await response.json();
 
