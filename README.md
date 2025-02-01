@@ -46,6 +46,16 @@ yarn dev
 
 5. Open [http://localhost:3000](http://localhost:3000) with your browser
 
+## Getting Started with Docker
+
+You can easily run the Minimal Next Ollama Chat application using Docker. To pull the image from Docker Hub, use the following command:
+
+```bash
+docker pull aanilkay/minimalnextollamachat
+```
+
+After pulling the image, you can run it with Docker to start using the application.
+
 ## Docker Instructions
 
 ## Prerequisites
