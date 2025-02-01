@@ -2,11 +2,11 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { ChatProvider } from '../ChatContext';
-import { SelectModel } from '../SelectModel';
-import { SliderTemperatureComponent } from '../Services/SliderTemperatureComponent';
+import { SelectModel } from '../components/SelectModel';
 import ChatContainerWithStream from './ChatContainerWithStream';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { SliderTemperatureComponent } from '../components/SliderTemperatureComponent';
 
 function ChatComponent() {
   const [selectedModel, setSelectedModel] = useState("");

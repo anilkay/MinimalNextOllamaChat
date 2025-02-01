@@ -1,8 +1,8 @@
 "use client";
 
 import { memo, useCallback, useRef, useState, useEffect } from "react";
-import { ChatHistoryComponent } from "./ChatHistoryComponent";
-import { SendMessageComponent } from "./SendMessageComponent";
+import { ChatHistoryComponent } from "./components/ChatHistoryComponent";
+import { SendMessageComponent } from "./components/SendMessageComponent";
 import { MakeChatRequest, toBase64 } from "./Services/OllamaService";
 import { ChatHistory } from "./page";
 import { useChatContext } from "./ChatContext";

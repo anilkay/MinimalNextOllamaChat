@@ -1,9 +1,9 @@
 "use client";
 
 import { memo, useRef, useState, useCallback, useEffect } from "react";
-import { ChatHistoryComponent } from "../ChatHistoryComponent";
+import { ChatHistoryComponent } from "../components/ChatHistoryComponent";
 import { ChatHistory } from "../page";
-import { SendMessageComponent } from "../SendMessageComponent";
+import { SendMessageComponent } from "../components/SendMessageComponent";
 import { ChatMessageResponse } from '../Services/OllamaService';
 import { toast } from 'react-toastify';
 import { showToast } from "../utils/ToastUtils";

@@ -1,7 +1,7 @@
 "use client";
 
 import { memo, useCallback } from "react";
-import { useChatContext } from "./ChatContext";
+import { useChatContext } from "../ChatContext";
 
 
 const MessageInput = memo(function MessageInput() {

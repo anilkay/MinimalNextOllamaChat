@@ -2,7 +2,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import { memo } from "react";
-import { useChatContext } from "./ChatContext";
+import { useChatContext } from "../ChatContext";
 import MessageInput from "./MessageInput";
 
 const SendMessageComponent = memo(function SendMessageComponent({

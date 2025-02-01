@@ -1,12 +1,12 @@
 'use client';
 import { useState } from "react";
 import ChatContainer from "./ChatContainer";
-import { SelectModel } from "@/app/SelectModel";
+import { SelectModel } from "@/app/components/SelectModel";
 import Link from "next/link";
-import { SliderTemperatureComponent } from "./Services/SliderTemperatureComponent";
 import { ChatProvider } from "./ChatContext";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { SliderTemperatureComponent } from "./components/SliderTemperatureComponent";
 
 
 
