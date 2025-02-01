@@ -7,6 +7,7 @@ import ChatContainerWithStream from './ChatContainerWithStream';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { SliderTemperatureComponent } from '../components/SliderTemperatureComponent';
+import { SeedComponent } from '../components/SeedComponent';
 
 function ChatComponent() {
   const [selectedModel, setSelectedModel] = useState("");
@@ -29,6 +30,7 @@ function ChatComponent() {
           <div className="flex flex-col items-center gap-2">
               <SelectModel onSelectAction={setSelectedModel} />
               <SliderTemperatureComponent />
+              <SeedComponent />
           </div>
           
           {/* Sağdaki Link */}

@@ -25,7 +25,7 @@ export interface ChatMessageWithRoles {
     images: string[] | null
 }
 
-interface  OptionsType {
+export interface  OptionsType {
     temperature: number
     seed?: number
 }
@@ -97,7 +97,7 @@ export async function MakeChatRequest(temperature:number,seedUsage:boolean,seedV
     const MakeChatRequestFullUrl=ollamaEndpoint+"/api/chat";
     try {
         const options:OptionsType={temperature:temperature};
-        
+
         if(seedUsage){
             options["seed"]=seedValue;
         }

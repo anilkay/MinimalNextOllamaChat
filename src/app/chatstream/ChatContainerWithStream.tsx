@@ -4,9 +4,10 @@ import { memo, useRef, useState, useCallback, useEffect } from "react";
 import { ChatHistoryComponent } from "../components/ChatHistoryComponent";
 import { ChatHistory } from "../page";
 import { SendMessageComponent } from "../components/SendMessageComponent";
-import { ChatMessageResponse, toBase64 } from '../Services/OllamaService';
+import { ChatMessageResponse, OptionsType, toBase64 } from '../Services/OllamaService';
 import { toast } from 'react-toastify';
 import { showToast } from "../utils/ToastUtils";
+import { useChatContext } from "../ChatContext";
 
 const MemoizedChatHistory = memo(ChatHistoryComponent);
 const MemoizedSendMessage = memo(SendMessageComponent);
@@ -19,6 +20,7 @@ function ChatContainerWithStream({ selectedModel }: ChatContainerProps) {
     const chatHistory = useRef<ChatHistory[]>([]);
     const messageCount = useRef(0);
     const [chatUpdate, setChatUpdate] = useState(0);
+    const {temperature,seedValue,seedUsage}=useChatContext()
 
     const sendMessage = useCallback(async({ message, image }: { message: string; image: File | null }) => {
         if (!selectedModel) {
@@ -43,12 +45,19 @@ function ChatContainerWithStream({ selectedModel }: ChatContainerProps) {
         });
         setChatUpdate((prev) => prev + 1);
 
+        const options:OptionsType={temperature:temperature};
+        
+        if(seedUsage){
+            options["seed"]=seedValue;
+        }
+
         const response = await fetch('http://localhost:11434/api/chat', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
+              options: options,
               model: selectedModel,  // or your preferred model
               messages: [
                 {
