@@ -78,6 +78,24 @@ docker run -p 3000:3000 minimalnextollamachat
 ## Accessing the Application
 After running the container, you can access the application at `http://localhost:3000`. 
 
+## Static Version
+
+If you want to use the static version of the application, you can pull the following image:
+
+```bash
+docker pull aanilkay/minimalnextollamachat:latest_static
+```
+
+## Running the Static Version
+
+To run the static version of the application, use the following command:
+
+```bash
+docker run -p 3000:80 aanilkay/minimalnextollamachat:latest_static
+```
+
+This will map port 3000 on your host to port 80 in the container.
+
 ## Usage
 
 ### Chat Interface

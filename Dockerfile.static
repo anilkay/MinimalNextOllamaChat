@@ -1,0 +1,29 @@
+# Stage 1: Build the Next.js app
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Copy package files and install dependencies with npm ci
+COPY package.json package-lock.json ./
+RUN npm ci
+
+# Copy source code and build static site
+COPY . .
+RUN sed -i 's/standalone/export/g' next.config.ts
+
+RUN npm run build
+
+# Stage 2: Serve static files with Caddy
+FROM caddy:alpine
+
+# Copy Caddyfile (configuration)
+COPY Caddyfile /etc/caddy/Caddyfile
+
+# Copy exported Next.js static site to Caddy's web root
+COPY --from=builder /app/out /usr/share/caddy
+
+# Expose port 80 for HTTP
+EXPOSE 80
+
+# Start Caddy
+CMD ["caddy", "run", "--config", "/etc/caddy/Caddyfile"]
