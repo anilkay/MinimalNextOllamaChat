@@ -11,6 +11,8 @@ interface ChatContextType {
     setSeedValue: (value: number)=> void,
     seedUsage:boolean,
     setSeedUsage: (value: boolean)=> void,
+    selectedModel:string,
+    setSelectedModel: (value: string)=> void
 }
 
 const ChatContext = createContext<ChatContextType | null>(null);
@@ -20,6 +22,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     const [temperature,setTemperature]=useState(0.7);
     const [seedValue,setSeedValue]=useState(0);
     const [seedUsage,setSeedUsage]=useState(false);
+    const [selectedModel,setSelectedModel]=useState("")
 
     const contextValue = {
         inputValue,
@@ -29,7 +32,9 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         seedValue,
         setSeedValue,
         seedUsage,
-        setSeedUsage
+        setSeedUsage,
+        selectedModel,
+        setSelectedModel
     };
 
     return (

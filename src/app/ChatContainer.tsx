@@ -11,15 +11,13 @@ import { showToast } from "./utils/ToastUtils";
 const MemoizedChatHistory = memo(ChatHistoryComponent);
 const MemoizedSendMessage = memo(SendMessageComponent);
 
-interface ChatContainerProps {
-    selectedModel: string;
-}
 
-function ChatContainer({ selectedModel }: ChatContainerProps) {
+
+function ChatContainer() {
     const chatHistory = useRef<ChatHistory[]>([]);
     const messageCount = useRef(0);
     const [chatUpdate, setChatUpdate] = useState(0);
-    const {temperature,seedValue,seedUsage}=useChatContext()
+    const {temperature,seedValue,seedUsage,selectedModel}=useChatContext()
 
     const sendMessage = useCallback(async({ message, image }: { message: string; image: File | null }) => {
         if (!selectedModel) {

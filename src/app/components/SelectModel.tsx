@@ -2,11 +2,12 @@
 
 import {useEffect, useState} from "react";
 import {GetModels, Model} from "@/app/Services/OllamaService";
+import { useChatContext } from "../ChatContext";
 
-export function SelectModel({ onSelectAction }: { onSelectAction: (model: string) => void }) {
+export function SelectModel() {
     const [models, setModels] = useState<Model[]|undefined>([]);
     const [loading, setLoading] = useState(true);
-    const [selectedModel, setSelectedModel] = useState("")
+    const {selectedModel,setSelectedModel} = useChatContext();
     const error= null
 
     useEffect(() => {
@@ -18,7 +19,6 @@ export function SelectModel({ onSelectAction }: { onSelectAction: (model: string
 
     const handleSelect = (model: string) => {
         setSelectedModel(model)
-        onSelectAction(model);
     };
 
     return (

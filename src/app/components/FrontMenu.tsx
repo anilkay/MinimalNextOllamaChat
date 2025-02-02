@@ -4,7 +4,6 @@ import { SelectModel } from "./SelectModel"
 import { SliderTemperatureComponent } from "./SliderTemperatureComponent"
 
 interface FrontMenuProps {
-    setSelectedModel: (model: string) => void;
     leftLinkText: string;
     leftLinkHref: string;
 }
@@ -23,7 +22,7 @@ export function FrontMenu(props:FrontMenuProps){
             
         </div>
             <div className="flex flex-col items-center gap-2">
-                <SelectModel onSelectAction={props.setSelectedModel} />
+                <SelectModel />
                 <SliderTemperatureComponent />
             </div>
 
