@@ -4,7 +4,7 @@ import { memo, useRef, useState, useCallback, useEffect } from "react";
 import { ChatHistoryComponent } from "../components/ChatHistoryComponent";
 import { ChatHistory } from "../page";
 import { SendMessageComponent } from "../components/SendMessageComponent";
-import { ChatMessageResponse, OptionsType, toBase64 } from '../Services/OllamaService';
+import { ChatMessageResponse, GetApiEndpoint, OptionsType, toBase64 } from '../Services/OllamaService';
 import { showToast } from "../utils/ToastUtils";
 import { useChatContext } from "../ChatContext";
 
@@ -46,8 +46,8 @@ function ChatContainerWithStream() {
         if(seedUsage){
             options["seed"]=seedValue;
         }
-
-        const response = await fetch('http://localhost:11434/api/chat', {
+        const ollamaEndpoint=GetApiEndpoint();
+        const response = await fetch(ollamaEndpoint+'/api/chat', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
