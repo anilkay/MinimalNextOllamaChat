@@ -78,6 +78,20 @@ docker run -p 3000:3000 minimalnextollamachat
 ## Accessing the Application
 After running the container, you can access the application at `http://localhost:3000`. 
 
+## Docker Image Versions
+
+The following Docker image versions are available:
+
+- **amd64** version:
+  - `latest_amd64`
+  - `0.1.2_amd64`
+
+- **arm64** version:
+  - `latest`
+  - `0.1.2`
+
+You can pull these images using the respective tags.
+
 ## Static Version
 
 If you want to use the static version of the application, you can pull the following image:
