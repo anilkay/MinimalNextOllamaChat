@@ -1,9 +1,9 @@
 "use client";
 
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode, useRef } from 'react';
 
 interface ChatContextType {
-    inputValue: string;
+    inputValue: () => string;
     setInputValue: (value: string) => void;
     temperature:number,
     setTemperature: (value: number)=> void,
@@ -22,13 +22,20 @@ interface ChatContextType {
 const ChatContext = createContext<ChatContextType | null>(null);
 
 export function ChatProvider({ children }: { children: ReactNode }) {
-    const [inputValue, setInputValue] = useState("");
+    //const [inputValue, setInputValue] = useState("");
+    const inputValueRef= useRef("");
     const [temperature,setTemperature]=useState(0.7);
     const [seedValue,setSeedValue]=useState(0);
     const [seedUsage,setSeedUsage]=useState(false);
     const [selectedModel,setSelectedModel]=useState("");
     const [systemPrompt,setSystemPrompt]=useState("");
     const [systemPromptUsage,setSystemPromptUsage]=useState(false);
+
+    const setInputValue= (inputValue:string)=> {
+        inputValueRef.current=inputValue
+    }
+
+    const inputValue= ()=> inputValueRef.current;
     
     const contextValue = {
         inputValue,
