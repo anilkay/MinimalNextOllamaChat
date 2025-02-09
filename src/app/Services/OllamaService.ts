@@ -21,13 +21,21 @@ export interface Details {
 
 export interface ChatMessageWithRoles {
     message: string,
-    role: 'user' | 'assistant'
+    role: 'user' | 'assistant' | 'system'
     images: string[] | null
 }
 
 export interface  OptionsType {
     temperature: number
     seed?: number
+}
+
+interface RequestBodyType {
+    options: OptionsType;
+    model: string;
+    stream: boolean;
+    messages: ChatMessageMessageRequest[];
+    system?: string;
 }
 
 
@@ -56,7 +64,7 @@ export async function GetModels(){
 
 export interface ChatMessageMessageRequest {
     content: string;
-    role: 'user' | 'assistant'
+    role: 'user' | 'assistant' | 'system'
     images?: string[] | null
 }
 
@@ -91,9 +99,17 @@ export const toBase64 = (file: File): Promise<string> =>
     });
 
 
-export async function MakeChatRequest(temperature:number,seedUsage:boolean,seedValue:number,modelName:string,chatMessages:ChatMessageWithRoles[]){
+export async function MakeChatRequest(temperature:number,seedUsage:boolean,seedValue:number,systemPromptUsage:boolean,systemPrompt:string,modelName:string,chatMessages:ChatMessageWithRoles[]){
     const ollamaEndpoint=GetApiEndpoint();
     const messages:ChatMessageMessageRequest[] =chatMessages.map((chatMessage:ChatMessageWithRoles)=>{return {role:chatMessage.role,content:chatMessage.message,images:chatMessage.images}});
+
+    if(systemPromptUsage){
+        messages.unshift({role:"system",content:systemPrompt,images:null});
+        
+    }
+
+
+
     const MakeChatRequestFullUrl=ollamaEndpoint+"/api/chat";
     try {
         const options:OptionsType={temperature:temperature};
@@ -101,13 +117,16 @@ export async function MakeChatRequest(temperature:number,seedUsage:boolean,seedV
         if(seedUsage){
             options["seed"]=seedValue;
         }
+        
+        const requestBody:RequestBodyType={options:options,model:modelName,stream:false,messages:messages}
 
+      
         const response=await fetch(MakeChatRequestFullUrl,{
             method:"POST",
             headers:{
                 "Content-Type":"application/json",
             },
-            body:JSON.stringify({options:options,model:modelName,stream:false,messages:messages}),
+            body:JSON.stringify(requestBody),
         });
         const data=await response.json();
 

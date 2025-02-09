@@ -4,7 +4,7 @@ import { memo, useRef, useState, useCallback, useEffect } from "react";
 import { ChatHistoryComponent } from "../components/ChatHistoryComponent";
 import { ChatHistory } from "../page";
 import { SendMessageComponent } from "../components/SendMessageComponent";
-import { ChatMessageResponse, GetApiEndpoint, OptionsType, toBase64 } from '../Services/OllamaService';
+import { ChatMessageMessageRequest, ChatMessageResponse, GetApiEndpoint, OptionsType, toBase64 } from '../Services/OllamaService';
 import { showToast } from "../utils/ToastUtils";
 import { useChatContext } from "../ChatContext";
 
@@ -16,7 +16,7 @@ function ChatContainerWithStream() {
     const chatHistory = useRef<ChatHistory[]>([]);
     const messageCount = useRef(0);
     const [chatUpdate, setChatUpdate] = useState(0);
-    const {temperature,seedValue,seedUsage,selectedModel}=useChatContext()
+    const {temperature,seedValue,seedUsage,selectedModel,systemPrompt,systemPromptUsage}=useChatContext()
 
     const sendMessage = useCallback(async({ message, image }: { message: string; image: File | null }) => {
         if (!selectedModel) {
@@ -32,6 +32,12 @@ function ChatContainerWithStream() {
             images.push(base64Image);
         }
 
+        const messages:ChatMessageMessageRequest[] =[]
+        if(systemPromptUsage){
+            messages.unshift({role:"system",content:systemPrompt,images:null});
+        }
+
+
         chatHistory.current.push({
             message: message,
             sender: "You",
@@ -46,6 +52,15 @@ function ChatContainerWithStream() {
         if(seedUsage){
             options["seed"]=seedValue;
         }
+
+        messages.push( 
+          {
+            role: 'user',
+            content: message,
+            images: images
+          },
+        )
+
         const ollamaEndpoint=GetApiEndpoint();
         const response = await fetch(ollamaEndpoint+'/api/chat', {
             method: 'POST',
@@ -55,13 +70,7 @@ function ChatContainerWithStream() {
             body: JSON.stringify({
               options: options,
               model: selectedModel,  // or your preferred model
-              messages: [
-                {
-                  role: 'user',
-                  content: message,
-                  images: images
-                },
-              ],
+              messages:messages,
               stream: true, // Enable streaming
             }),
           });
@@ -69,8 +78,6 @@ function ChatContainerWithStream() {
             return;
           }
 
-          console.log(response);
-          console.log("status",response.status)
 
           if(response.status!=200){
             const errorResponse=await response.json() as ChatMessageResponse
@@ -124,7 +131,7 @@ function ChatContainerWithStream() {
          
           messageCount.current += 1;
           setChatUpdate((prev) => prev + 1);
-    }, [selectedModel]);
+    }, [selectedModel,temperature,seedValue,seedUsage,systemPrompt,systemPromptUsage]);
 
     useEffect(() => {
         chatHistory.current = [];

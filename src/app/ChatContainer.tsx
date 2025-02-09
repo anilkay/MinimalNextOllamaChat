@@ -17,7 +17,7 @@ function ChatContainer() {
     const chatHistory = useRef<ChatHistory[]>([]);
     const messageCount = useRef(0);
     const [chatUpdate, setChatUpdate] = useState(0);
-    const {temperature,seedValue,seedUsage,selectedModel}=useChatContext()
+    const {temperature,seedValue,seedUsage,selectedModel,systemPrompt,systemPromptUsage}=useChatContext()
 
     const sendMessage = useCallback(async({ message, image }: { message: string; image: File | null }) => {
         if (!selectedModel) {
@@ -48,10 +48,11 @@ function ChatContainer() {
             temperature,
             seedUsage,
             seedValue,
+            systemPromptUsage,
+            systemPrompt,
             selectedModel,
             chatHistory.current,
         ).then(function (result) {
-            console.log(result);
             if(result.error){
                 chatHistory.current.push({
                     message: "Error making chat request",
@@ -81,7 +82,7 @@ function ChatContainer() {
 
     useEffect(() => {
         chatHistory.current = [];
-        messageCount.current = 0;
+        messageCount.currfent = 0;
         setChatUpdate(0);
     }, [selectedModel]);
 

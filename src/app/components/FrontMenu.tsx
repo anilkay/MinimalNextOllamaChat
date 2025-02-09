@@ -2,6 +2,7 @@ import Link from "next/link"
 import { SeedComponent } from "./SeedComponent"
 import { SelectModel } from "./SelectModel"
 import { SliderTemperatureComponent } from "./SliderTemperatureComponent"
+import { SystemPromptComponent } from "./SystemPromptComponent";
 
 interface FrontMenuProps {
     leftLinkText: string;
@@ -28,6 +29,7 @@ export function FrontMenu(props:FrontMenuProps){
 
             <div className="flex flex-col items-center gap-2">
                 <SeedComponent />
+                <SystemPromptComponent />
              </div>
             <div>
             <div className="flex flex-col items-center gap-2">
