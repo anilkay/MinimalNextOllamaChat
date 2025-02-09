@@ -78,11 +78,11 @@ function ChatContainer() {
             messageCount.current += 1;
             setChatUpdate((prev) => prev + 1);
         });
-    }, [selectedModel, temperature]);
+    }, [selectedModel, temperature, seedUsage, seedValue, systemPromptUsage, systemPrompt]);
 
     useEffect(() => {
         chatHistory.current = [];
-        messageCount.currfent = 0;
+        messageCount.current = 0;
         setChatUpdate(0);
     }, [selectedModel]);
 
