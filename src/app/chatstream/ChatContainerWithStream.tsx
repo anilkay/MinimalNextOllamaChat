@@ -47,7 +47,7 @@ function ChatContainerWithStream() {
         });
         setChatUpdate((prev) => prev + 1);
 
-        const options:OptionsType={temperature:temperature};
+        const options:OptionsType={temperature:temperature()};
 
         if(seedUsage){
             options["seed"]=seedValue;

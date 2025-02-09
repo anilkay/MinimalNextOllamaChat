@@ -45,7 +45,7 @@ function ChatContainer() {
         
 
         MakeChatRequest(
-            temperature,
+            temperature(),
             seedUsage,
             seedValue,
             systemPromptUsage,
