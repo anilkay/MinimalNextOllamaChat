@@ -8,7 +8,7 @@ export function SelectModel() {
     const [models, setModels] = useState<Model[]|undefined>([]);
     const [loading, setLoading] = useState(true);
     const [localSelectedModel, setLocalSelectedModel] = useState("");
-    const {selectedModel,setSelectedModel} = useChatContext();
+    const {setSelectedModel} = useChatContext();
     const error= null
 
     useEffect(() => {
