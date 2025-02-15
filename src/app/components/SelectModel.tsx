@@ -7,6 +7,7 @@ import { useChatContext } from "../ChatContext";
 export function SelectModel() {
     const [models, setModels] = useState<Model[]|undefined>([]);
     const [loading, setLoading] = useState(true);
+    const [localSelectedModel, setLocalSelectedModel] = useState("");
     const {selectedModel,setSelectedModel} = useChatContext();
     const error= null
 
@@ -19,6 +20,7 @@ export function SelectModel() {
 
     const handleSelect = (model: string) => {
         setSelectedModel(model)
+        setLocalSelectedModel(model)
     };
 
     return (
@@ -33,7 +35,7 @@ export function SelectModel() {
                              px-4 py-2 text-sm border border-gray-700/50 
                              focus:outline-none focus:ring-2 focus:ring-blue-500/50
                              shadow-lg backdrop-blur-sm"
-                    value={selectedModel}
+                    value={localSelectedModel}
                     onChange={(e) => handleSelect(e.target.value)}
                 >
                     <option value="">Model Seçin</option>

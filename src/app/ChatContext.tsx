@@ -1,19 +1,19 @@
 "use client";
 
-import { createContext, useContext, useState, ReactNode, useRef } from 'react';
+import { createContext, useContext, ReactNode, useRef } from 'react';
 
 interface ChatContextType {
     temperature:() => number,
     setTemperature: (value: number)=> void,
-    seedValue:number,
+    seedValue:()=>number,
     setSeedValue: (value: number)=> void,
-    seedUsage:boolean,
+    seedUsage:()=>boolean,
     setSeedUsage: (value: boolean)=> void,
-    selectedModel:string,
+    selectedModel:()=> string,
     setSelectedModel: (value: string)=> void,
-    systemPrompt:string,
+    systemPrompt:()=>string,
     setSystemPrompt: (value: string)=> void,
-    systemPromptUsage:boolean,
+    systemPromptUsage:()=>boolean,
     setSystemPromptUsage: (value: boolean)=> void,
 }
 
@@ -22,12 +22,11 @@ const ChatContext = createContext<ChatContextType | null>(null);
 export function ChatProvider({ children }: { children: ReactNode }) {
     //const [inputValue, setInputValue] = useState("");
     const temperatureRef= useRef(0.7);
-    const [seedValue,setSeedValue]=useState(0);
-    const [seedUsage,setSeedUsage]=useState(false);
-    const [selectedModel,setSelectedModel]=useState("");
-    const [systemPrompt,setSystemPrompt]=useState("");
-    const [systemPromptUsage,setSystemPromptUsage]=useState(false);
-
+    const seedValueRef=useRef(0);
+    const seedUsageRef=useRef(false);
+    const selectedModelRef=useRef("")
+    const systemPromptRef=useRef("")
+    const systemPromptUsageRef=useRef(false)
     
 
     const setTemperature= (temperature:number)=> {
@@ -35,6 +34,36 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     }
 
     const temperature= ()=> temperatureRef.current;
+
+   const setSelectedModel= (value: string)=> {
+            selectedModelRef.current=value
+    }
+    
+    const selectedModel=()=> selectedModelRef.current;
+
+    const setSeedUsage= (value: boolean)=> {
+        seedUsageRef.current=value
+    }
+    
+    const seedUsage=()=> seedUsageRef.current;
+
+    const setSeedValue= (value: number)=> {
+        seedValueRef.current=value
+    }
+    
+    const seedValue=()=> seedValueRef.current;
+
+    const setSystemPrompt= (value: string)=> {
+        systemPromptRef.current=value
+    }
+    
+    const systemPrompt=()=> systemPromptRef.current;
+
+    const setSystemPromptUsage= (value: boolean)=> {
+        systemPromptUsageRef.current=value
+    }
+    
+    const systemPromptUsage=()=> systemPromptUsageRef.current;
     
     const contextValue = {
         temperature,

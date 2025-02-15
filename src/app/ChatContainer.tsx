@@ -46,11 +46,11 @@ function ChatContainer() {
 
         MakeChatRequest(
             temperature(),
-            seedUsage,
-            seedValue,
-            systemPromptUsage,
-            systemPrompt,
-            selectedModel,
+            seedUsage(),
+            seedValue(),
+            systemPromptUsage(),
+            systemPrompt(),
+            selectedModel(),
             chatHistory.current,
         ).then(function (result) {
             if(result.error){

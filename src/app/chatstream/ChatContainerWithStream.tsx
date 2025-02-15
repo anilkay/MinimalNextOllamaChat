@@ -34,8 +34,8 @@ function ChatContainerWithStream() {
         }
 
         
-        if(systemPromptUsage){
-            messages.current.unshift({role:"system",content:systemPrompt,images:null});
+        if(systemPromptUsage()){
+            messages.current.unshift({role:"system",content:systemPrompt(),images:null});
         }
 
 
@@ -50,8 +50,8 @@ function ChatContainerWithStream() {
 
         const options:OptionsType={temperature:temperature()};
 
-        if(seedUsage){
-            options["seed"]=seedValue;
+        if(seedUsage()){
+            options["seed"]=seedValue();
         }
 
         messages.current.push( 
