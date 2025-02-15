@@ -1,24 +1,38 @@
 "use client";
 
-import { memo, useCallback, useState } from "react";
-import { useChatContext } from "../ChatContext";
+import { memo, useCallback, useState, useRef } from "react";
 
 interface MessageInputProps {
-    onSendChatMessageAction: (chatMessage: { message: string; image: File | null }) => void;
-    fileInputRef: React.RefObject<HTMLInputElement | null>
-    handleFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-    sendMessage: () => void;
+    onSendChatMessageAction: (chatMessage: { message: string; image: File | null }) => boolean;
 }
 
 
 const MessageInput = memo(function MessageInput(props: MessageInputProps) {
-    const {setInputValue } = useChatContext();
     const [localInputValue, setLocalInputValue] = useState("");
+    const [ image, setImage] = useState<File | null>(null);
+    const fileInputRef = useRef<HTMLInputElement | null>(null);
 
     const handleChange = useCallback((event: React.ChangeEvent<HTMLTextAreaElement>) => {
-        setInputValue(event.currentTarget.value);
         setLocalInputValue(event.currentTarget.value);
-    }, [setInputValue]);
+    }, []);
+
+    const sendMessage=()=> {
+        const canSend=props.onSendChatMessageAction({ message: localInputValue, image: image });
+
+        if(canSend){
+            setLocalInputValue("");
+            setImage(null);
+            if (fileInputRef.current) {
+                fileInputRef.current.value = "";
+            }
+        }
+    }
+
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files && event.target.files[0]) {
+            setImage(event.target.files[0]);
+        }
+    };
 
     return (
         <>
@@ -28,10 +42,10 @@ const MessageInput = memo(function MessageInput(props: MessageInputProps) {
             onChange={handleChange}
             placeholder="Type your message..."
         />
-        <input ref={props.fileInputRef} type="file" accept="image/*" onChange={props.handleFileChange} />
+        <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} />
             <button
                 className="w-full py-2 px-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-50 disabled:cursor-not-allowed"
-                onClick={props.sendMessage}
+                onClick={sendMessage}
                 disabled={localInputValue.trim() === ""}
             >
                 Send
