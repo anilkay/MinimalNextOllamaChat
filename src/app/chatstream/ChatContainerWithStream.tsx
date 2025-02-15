@@ -15,13 +15,14 @@ const MemoizedSendMessage = memo(SendMessageComponent);
 function ChatContainerWithStream() {
     const chatHistory = useRef<ChatHistory[]>([]);
     const messageCount = useRef(0);
+    const messages = useRef<ChatMessageMessageRequest[]>([]);
     const [chatUpdate, setChatUpdate] = useState(0);
     const {temperature,seedValue,seedUsage,selectedModel,systemPrompt,systemPromptUsage}=useChatContext()
 
     const sendMessage = useCallback(async({ message, image }: { message: string; image: File | null }) => {
         if (!selectedModel) {
             showToast('error', "Please select a model first");
-            return;
+            return false;
         }
 
         let images:string[] |null |undefined=null
@@ -32,9 +33,9 @@ function ChatContainerWithStream() {
             images.push(base64Image);
         }
 
-        const messages:ChatMessageMessageRequest[] =[]
+        
         if(systemPromptUsage){
-            messages.unshift({role:"system",content:systemPrompt,images:null});
+            messages.current.unshift({role:"system",content:systemPrompt,images:null});
         }
 
 
@@ -53,7 +54,7 @@ function ChatContainerWithStream() {
             options["seed"]=seedValue;
         }
 
-        messages.push( 
+        messages.current.push( 
           {
             role: 'user',
             content: message,
@@ -70,12 +71,12 @@ function ChatContainerWithStream() {
             body: JSON.stringify({
               options: options,
               model: selectedModel,  // or your preferred model
-              messages:messages,
+              messages:messages.current,
               stream: true, // Enable streaming
             }),
           });
           if(!response.body){
-            return;
+            return false;
           }
 
 
@@ -92,7 +93,7 @@ function ChatContainerWithStream() {
 
             messageCount.current += 1;
             setChatUpdate((prev) => prev + 1);
-            return;
+            return true;
           }
 
           const reader = response.body.getReader();
