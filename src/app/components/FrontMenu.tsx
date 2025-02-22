@@ -1,8 +1,6 @@
 import Link from "next/link"
-import { SeedComponent } from "./SeedComponent"
 import { SelectModel } from "./SelectModel"
 import { SliderTemperatureComponent } from "./SliderTemperatureComponent"
-import { SystemPromptComponent } from "./SystemPromptComponent";
 
 interface FrontMenuProps {
     leftLinkText: string;
