@@ -9,9 +9,7 @@ RUN npm ci
 
 # Copy source code and build static site
 COPY . .
-RUN sed -i 's/standalone/export/g' next.config.ts
-
-RUN npm run build
+RUN sed -i 's/standalone/export/g' next.config.ts && npm run build
 
 # Stage 2: Serve static files with Caddy
 FROM caddy:alpine
