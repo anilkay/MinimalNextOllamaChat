@@ -33,8 +33,7 @@ return (
             value={localSeedValue}
             onChange={(e) => handleSeedValueChange(Number(e.target.value))}
             placeholder="Enter seed value"
-            className="border border-gray-600 bg-gray-800 text-white rounded p-2"
-        />
+            className="border border-gray-600 bg-gray-800 text-white rounded p-2" />
     )}
 </div>
 )
