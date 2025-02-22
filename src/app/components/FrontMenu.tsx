@@ -27,10 +27,6 @@ export function FrontMenu(props:FrontMenuProps){
                 <SliderTemperatureComponent />
             </div>
 
-            <div className="flex flex-col items-center gap-2">
-                <SeedComponent />
-                <SystemPromptComponent />
-             </div>
             <div>
             <div className="flex flex-col items-center gap-2">
             <Link 
