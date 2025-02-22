@@ -23,8 +23,7 @@ export const SystemPromptComponent: React.FC = () => {
                 type="checkbox"
                 checked={localSystemPromptUsage}
                 onChange={(e) => handleSystemPromptUsageChange(e.target.checked)}
-                className="mr-2 accent-blue-500" />
-            Use System Prompt
+                className="mr-2 accent-blue-500" /> Use System Prompt
         </label>
         {localSystemPromptUsage && (
             <input

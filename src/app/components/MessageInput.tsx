@@ -29,7 +29,7 @@ const MessageInput = memo(function MessageInput(props: MessageInputProps) {
     }
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (event.target.files && event.target.files[0]) {
+        if (event.target.files?.[0]) {
             setImage(event.target.files[0]);
         }
     };

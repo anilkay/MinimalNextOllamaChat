@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, ReactNode, useRef } from 'react';
+import { createContext, useContext, ReactNode, useRef, useMemo } from 'react';
 
 interface ChatContextType {
     temperature:() => number,
@@ -65,20 +65,22 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     
     const systemPromptUsage=()=> systemPromptUsageRef.current;
     
-    const contextValue = {
-        temperature,
-        setTemperature,
-        seedValue,
-        setSeedValue,
-        seedUsage,
-        setSeedUsage,
-        selectedModel,
-        setSelectedModel,
-        systemPrompt,
-        setSystemPrompt,
-        systemPromptUsage,
-        setSystemPromptUsage
-    };
+    const contextValue = useMemo(() => {
+        return {
+            temperature,
+            setTemperature,
+            seedValue,
+            setSeedValue,
+            seedUsage,
+            setSeedUsage,
+            selectedModel,
+            setSelectedModel,
+            systemPrompt,
+            setSystemPrompt,
+            systemPromptUsage,
+            setSystemPromptUsage
+        };
+    }, []);
 
     return (
         <ChatContext.Provider value={contextValue}>

@@ -90,7 +90,7 @@ export const toBase64 = (file: File): Promise<string> =>
     new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
-        
+
         reader.onload = () => {
             const base64String = reader.result as string;
             const base64Data = base64String.split(',')[1]; // Get only the data part
@@ -99,11 +99,11 @@ export const toBase64 = (file: File): Promise<string> =>
 
         reader.onerror = (error) => {
              if (!(error instanceof Error)) {
-                reject(new Error('An unexpected error occurred: ' + error));
+                reject(new Error('An unexpected error occurred: '));
             } 
             else {
                 reject(error);
-    }
+           }
 };
     });
 

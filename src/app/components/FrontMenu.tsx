@@ -7,7 +7,7 @@ interface FrontMenuProps {
     leftLinkHref: string;
 }
 
-export function FrontMenu(props:FrontMenuProps){
+export function FrontMenu(props:Readonly<FrontMenuProps>){
     return  (
         <>
         <div className="flex flex-col items-center gap-2">

@@ -23,9 +23,7 @@ return (
             type="checkbox"
             checked={localSeedUsage}
             onChange={(e) => handleSeedUsageChange(e.target.checked)}
-            className="mr-2 accent-blue-500"
-        />
-        Use Seed
+            className="mr-2 accent-blue-500" /> Use Seed
     </label>
     {localSeedUsage && (
         <input
