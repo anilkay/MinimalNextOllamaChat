@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { memo, useState } from "react";
 import { useChatContext } from "../ChatContext"
 
 export const SystemPromptComponent: React.FC = () => {
@@ -37,3 +37,5 @@ export const SystemPromptComponent: React.FC = () => {
     </div>  
     )
 }
+
+export default memo(SystemPromptComponent);

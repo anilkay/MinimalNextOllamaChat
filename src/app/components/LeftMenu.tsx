@@ -1,4 +1,5 @@
-import { SeedComponent } from "./SeedComponent";
+import { memo } from "react";
+import  SeedComponent  from "./SeedComponent";
 import { SystemPromptComponent } from "./SystemPromptComponent";
 
 
@@ -10,3 +11,6 @@ export function LeftMenu() {
              </div>
     );
 }
+
+export default memo(LeftMenu);
+

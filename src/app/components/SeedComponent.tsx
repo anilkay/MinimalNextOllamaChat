@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { memo, useState } from "react";
 import { useChatContext } from "../ChatContext";
 
 export function SeedComponent() {
@@ -36,3 +36,5 @@ return (
 </div>
 )
 }
+
+export default memo(SeedComponent);

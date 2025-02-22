@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useCallback, useRef, useState, useEffect } from "react";
+import { memo, useCallback, useRef, useState } from "react";
 import { MakeChatRequest, toBase64 } from "./Services/OllamaService";
 import { ChatHistory } from "./page";
 import { useChatContext } from "./ChatContext";
@@ -17,7 +17,7 @@ function ChatContainer() {
     const {temperature,seedValue,seedUsage,selectedModel,systemPrompt,systemPromptUsage}=useChatContext()
 
     const sendMessage = useCallback(async({ message, image }: { message: string; image: File | null }) => {
-        if (!selectedModel) {
+        if (!selectedModel() || selectedModel()=="") {
             showToast('error', "Please select a model first");
             return;
         }
@@ -75,13 +75,8 @@ function ChatContainer() {
             messageCount.current += 1;
             setChatUpdate((prev) => prev + 1);
         });
-    }, [selectedModel, temperature, seedUsage, seedValue, systemPromptUsage, systemPrompt]);
+    }, []);
 
-    useEffect(() => {
-        chatHistory.current = [];
-        messageCount.current = 0;
-        setChatUpdate(0);
-    }, [selectedModel]);
 
     return (
         <ChatContainerLayout chatHistory={chatHistory.current} sendMessage={sendMessage} chatUpdate={chatUpdate} />

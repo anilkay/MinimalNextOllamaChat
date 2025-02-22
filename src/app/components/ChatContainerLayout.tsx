@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { ChatHistoryComponent } from './ChatHistoryComponent';
+import ChatHistoryComponent  from './ChatHistoryComponent';
 import { SendMessageComponent } from './SendMessageComponent';
 import { ChatHistory } from '../page';
 

@@ -13,11 +13,11 @@ const SendMessageComponent = memo(function SendMessageComponent({
 
 
     const sendMessage = (chatMessage: { message: string; image: File | null }) => {
-        if (chatMessage.message.trim() !== "") {
-            onSendChatMessageAction(chatMessage);
-            return true;
+        if (chatMessage.message.trim() === "") {
+            return false;
         }
-        return false;
+        onSendChatMessageAction(chatMessage);
+        return true;
     };
 
     return (

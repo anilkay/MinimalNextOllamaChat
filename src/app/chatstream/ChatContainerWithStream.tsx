@@ -15,12 +15,11 @@ function ChatContainerWithStream() {
     const {temperature,seedValue,seedUsage,selectedModel,systemPrompt,systemPromptUsage}=useChatContext()
 
     const sendMessage = useCallback(async({ message, image }: { message: string; image: File | null }) => {
-        if (!selectedModel()) {
+        if (!selectedModel() || selectedModel()=="") {
             showToast('error', "Please select a model first");
             return false;
         }
 
-        console.log("Selected model",selectedModel())
 
         let images:string[] |null |undefined=null
         

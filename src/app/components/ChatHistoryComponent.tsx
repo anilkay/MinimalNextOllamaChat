@@ -1,6 +1,6 @@
 "use client";
 import {ChatHistory} from "@/app/page";
-import {FC} from "react";
+import {FC, memo} from "react";
 
 const exportChatHistory = (chatHistory: ChatHistory[]) => {
     const json = JSON.stringify(chatHistory, null, 2);
@@ -15,7 +15,7 @@ const exportChatHistory = (chatHistory: ChatHistory[]) => {
     URL.revokeObjectURL(url);
 };
 
-export const ChatHistoryComponent: FC<{ chathistory: ChatHistory[] }> = ({ chathistory }) => {
+const ChatHistoryComponent: FC<{ chathistory: ChatHistory[] }> = ({ chathistory }) => {
     return (
         <div className="flex flex-col space-y-4 py-4">
             <button 
@@ -42,3 +42,5 @@ export const ChatHistoryComponent: FC<{ chathistory: ChatHistory[] }> = ({ chath
         </div>
     );
 };
+
+export default memo(ChatHistoryComponent);
