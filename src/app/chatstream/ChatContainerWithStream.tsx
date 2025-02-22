@@ -1,17 +1,11 @@
 "use client";
 
 import { memo, useRef, useState, useCallback, useEffect } from "react";
-import { ChatHistoryComponent } from "../components/ChatHistoryComponent";
 import { ChatHistory } from "../page";
-import { SendMessageComponent } from "../components/SendMessageComponent";
 import { ChatMessageMessageRequest, ChatMessageResponse, GetApiEndpoint, OptionsType, toBase64 } from '../Services/OllamaService';
 import { showToast } from "../utils/ToastUtils";
 import { useChatContext } from "../ChatContext";
 import ChatContainerLayout from "../components/ChatContainerLayout";
-
-const MemoizedChatHistory = memo(ChatHistoryComponent);
-const MemoizedSendMessage = memo(SendMessageComponent);
-
 
 function ChatContainerWithStream() {
     const chatHistory = useRef<ChatHistory[]>([]);
