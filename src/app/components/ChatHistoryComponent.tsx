@@ -25,8 +25,8 @@ const ChatHistoryComponent: FC<{ chathistory: ChatHistory[] }> = ({ chathistory 
             >
                 📥 Save Conversation
             </button>
-            {chathistory.map((message, index) => (
-                <div key={index} className={`flex flex-col ${message.sender === "You" ? "items-end" : "items-start"}`}>
+            {chathistory.map((message) => (
+                <div key={message.messageNumber+message.role} className={`flex flex-col ${message.sender === "You" ? "items-end" : "items-start"}`}>
                     <div className="flex items-center gap-2 mb-1">
                         <span className="text-xs text-gray-400">{message.sender}</span>
                     </div>
