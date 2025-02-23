@@ -30,7 +30,7 @@ function ChatContainerWithStream() {
         }
 
         
-        if(systemPromptUsage()){
+        if(systemPromptUsage() && messages.current.findIndex(x => x.role === "system")<0){
             messages.current.unshift({role:"system",content:systemPrompt(),images:null});
         }
 
@@ -125,7 +125,13 @@ function ChatContainerWithStream() {
               }
             }
           }
-         
+
+          messages.current.push({
+            content:accumulatedMessage,
+            role: "assistant",
+            images: images
+          })
+        
           messageCount.current += 1;
           setChatUpdate((prev) => prev + 1);
     }, [selectedModel,temperature,seedValue,seedUsage,systemPrompt,systemPromptUsage]);

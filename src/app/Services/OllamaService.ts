@@ -112,12 +112,9 @@ export async function MakeChatRequest(temperature:number,seedUsage:boolean,seedV
     const ollamaEndpoint=GetApiEndpoint();
     const messages:ChatMessageMessageRequest[] =chatMessages.map((chatMessage:ChatMessageWithRoles)=>{return {role:chatMessage.role,content:chatMessage.message,images:chatMessage.images}});
 
-    if(systemPromptUsage){
+    if(systemPromptUsage && messages.findIndex(x => x.role === "system")<0){
         messages.unshift({role:"system",content:systemPrompt,images:null});
-        
     }
-
-
 
     const MakeChatRequestFullUrl=ollamaEndpoint+"/api/chat";
     try {
