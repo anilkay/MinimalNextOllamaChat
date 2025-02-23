@@ -6,6 +6,7 @@ import { ChatHistory } from "./page";
 import { useChatContext } from "./ChatContext";
 import { showToast } from "./utils/ToastUtils";
 import ChatContainerLayout from "./components/ChatContainerLayout";
+import { IsModelSelected } from "./utils/ChatControlUtils";
 
 
 
@@ -17,7 +18,7 @@ function ChatContainer() {
     const {temperature,seedValue,seedUsage,selectedModel,systemPrompt,systemPromptUsage}=useChatContext()
 
     const sendMessage = useCallback(async({ message, image }: { message: string; image: File | null }) => {
-        if (!selectedModel() || selectedModel()=="") {
+        if (!IsModelSelected(selectedModel()))  {
             showToast('error', "Please select a model first");
             return;
         }

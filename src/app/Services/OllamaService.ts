@@ -1,3 +1,4 @@
+import { IsSystemPromptAppended } from "../utils/ChatControlUtils";
 
 export interface ModelResult {
     models: Model[];
@@ -112,7 +113,7 @@ export async function MakeChatRequest(temperature:number,seedUsage:boolean,seedV
     const ollamaEndpoint=GetApiEndpoint();
     const messages:ChatMessageMessageRequest[] =chatMessages.map((chatMessage:ChatMessageWithRoles)=>{return {role:chatMessage.role,content:chatMessage.message,images:chatMessage.images}});
 
-    if(systemPromptUsage && messages.findIndex(x => x.role === "system")<0){
+    if(IsSystemPromptAppended(messages,systemPromptUsage)){
         messages.unshift({role:"system",content:systemPrompt,images:null});
     }
 

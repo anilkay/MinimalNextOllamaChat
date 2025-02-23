@@ -6,6 +6,7 @@ import { ChatMessageMessageRequest, ChatMessageResponse, GetApiEndpoint, Options
 import { showToast } from "../utils/ToastUtils";
 import { useChatContext } from "../ChatContext";
 import ChatContainerLayout from "../components/ChatContainerLayout";
+import { IsModelSelected, IsSystemPromptAppended } from "../utils/ChatControlUtils";
 
 function ChatContainerWithStream() {
     const chatHistory = useRef<ChatHistory[]>([]);
@@ -15,7 +16,7 @@ function ChatContainerWithStream() {
     const {temperature,seedValue,seedUsage,selectedModel,systemPrompt,systemPromptUsage}=useChatContext()
 
     const sendMessage = useCallback(async({ message, image }: { message: string; image: File | null }) => {
-        if (!selectedModel() || selectedModel()=="") {
+        if (!IsModelSelected(selectedModel())) {
             showToast('error', "Please select a model first");
             return false;
         }
@@ -30,7 +31,7 @@ function ChatContainerWithStream() {
         }
 
         
-        if(systemPromptUsage() && messages.current.findIndex(x => x.role === "system")<0){
+        if(IsSystemPromptAppended(messages.current,systemPromptUsage())){
             messages.current.unshift({role:"system",content:systemPrompt(),images:null});
         }
 
