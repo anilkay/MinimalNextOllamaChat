@@ -21,14 +21,18 @@ function ChatContainerWithStream() {
             return false;
         }
 
-
-        let images:string[] |null |undefined=null
-        
-        if(image){
-            images=[]
+        const getImages=async()=>{
+            if(!image){
+                return null;
+            }
+            let images:string[] |null |undefined=[]
             const base64Image=await toBase64(image);
             images.push(base64Image);
+            return images;
         }
+
+
+        const images= await getImages();
 
         
         if(IsSystemPromptAppended(messages.current,systemPromptUsage())){
@@ -47,9 +51,15 @@ function ChatContainerWithStream() {
 
         const options:OptionsType={temperature:temperature()};
 
-        if(seedUsage()){
+        const addSeedUsageToOptions=()=>{
+            if(!seedUsage()){
+                return;
+            }
             options["seed"]=seedValue();
         }
+
+
+        addSeedUsageToOptions();
 
         messages.current.push( 
           {
@@ -72,6 +82,7 @@ function ChatContainerWithStream() {
               stream: true, // Enable streaming
             }),
           });
+          
           if(!response.body){
             return false;
           }
