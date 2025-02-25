@@ -1,21 +1,34 @@
 "use client";
 
-import { memo, useCallback, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { MakeChatRequest, toBase64 } from "./Services/OllamaService";
-import { ChatHistory } from "./page";
 import { useChatContext } from "./ChatContext";
 import { showToast } from "./utils/ToastUtils";
 import ChatContainerLayout from "./components/ChatContainerLayout";
 import { IsModelSelected } from "./utils/ChatControlUtils";
+import { ChatHistory } from "./page";
 
 
 
 
 function ChatContainer() {
-    const chatHistory = useRef<ChatHistory[]>([]);
+    const chatHistoryRef = useRef<ChatHistory[]>([]);
     const messageCount = useRef(0);
     const [chatUpdate, setChatUpdate] = useState(0);
-    const {temperature,seedValue,seedUsage,selectedModel,systemPrompt,systemPromptUsage}=useChatContext()
+    const {temperature,seedValue,
+        seedUsage,selectedModel,
+        systemPrompt,systemPromptUsage,
+        chatHistory
+    }=useChatContext()
+
+     useEffect(() => {
+         chatHistoryRef.current = chatHistory
+         setChatUpdate((prev) => prev + 1);
+         if(chatHistoryRef.current.length>0){
+            const lastMessage=chatHistoryRef.current[chatHistoryRef.current.length-1];
+            messageCount.current=lastMessage.messageNumber+1
+        }
+     }, [chatHistory]);
 
     const sendMessage = useCallback(async({ message, image }: { message: string; image: File | null }) => {
         if (!IsModelSelected(selectedModel()))  {
@@ -31,7 +44,7 @@ function ChatContainer() {
             images.push(base64Image);
         }
 
-        chatHistory.current.push({
+        chatHistoryRef.current.push({
             message: message,
             sender: "You",
             messageNumber: messageCount.current,
@@ -49,10 +62,10 @@ function ChatContainer() {
             systemPromptUsage(),
             systemPrompt(),
             selectedModel(),
-            chatHistory.current,
+            chatHistoryRef.current,
         ).then(function (result) {
             if(result.error){
-                chatHistory.current.push({
+                chatHistoryRef.current.push({
                     message: "Error making chat request",
                     sender: "assistant",
                     messageNumber: messageCount.current,
@@ -66,7 +79,7 @@ function ChatContainer() {
 
             const chatMessageResponse = result.data?.message;
             const chatResponseModel = result.data?.model;
-            chatHistory.current.push({
+            chatHistoryRef.current.push({
                 message: chatMessageResponse?.content ?? "",
                 sender: chatResponseModel ?? "",
                 messageNumber: messageCount.current,
@@ -80,7 +93,7 @@ function ChatContainer() {
 
 
     return (
-        <ChatContainerLayout chatHistory={chatHistory.current} sendMessage={sendMessage} chatUpdate={chatUpdate} />
+        <ChatContainerLayout chatHistory={chatHistoryRef.current} sendMessage={sendMessage} chatUpdate={chatUpdate} />
     );
 }
 

@@ -9,11 +9,22 @@ import ChatContainerLayout from "../components/ChatContainerLayout";
 import { IsModelSelected, IsSystemPromptAppended } from "../utils/ChatControlUtils";
 
 function ChatContainerWithStream() {
-    const chatHistory = useRef<ChatHistory[]>([]);
+    const chatHistoryRef = useRef<ChatHistory[]>([]);
     const messageCount = useRef(0);
     const messages = useRef<ChatMessageMessageRequest[]>([]);
     const [chatUpdate, setChatUpdate] = useState(0);
-    const {temperature,seedValue,seedUsage,selectedModel,systemPrompt,systemPromptUsage}=useChatContext()
+    const {temperature,seedValue,seedUsage,selectedModel,systemPrompt,systemPromptUsage,chatHistory}=useChatContext()
+
+    useEffect(() => {
+         chatHistoryRef.current = chatHistory
+         setChatUpdate((prev) => prev + 1);
+         if(chatHistoryRef.current.length>0){
+            const lastMessage=chatHistoryRef.current[chatHistoryRef.current.length-1];
+            messageCount.current=lastMessage.messageNumber+1
+            //Chat Hisstory'deki son mesajları messages'a ekleyebiliriz
+            messages.current=chatHistoryRef.current.map((chatHistory:ChatHistory)=>{return {role:chatHistory.role,content:chatHistory.message,images:chatHistory.images}})
+        }
+     }, [chatHistory]);
 
     const sendMessage = useCallback(async({ message, image }: { message: string; image: File | null }) => {
         if (!IsModelSelected(selectedModel())) {
@@ -40,7 +51,7 @@ function ChatContainerWithStream() {
         }
 
 
-        chatHistory.current.push({
+        chatHistoryRef.current.push({
             message: message,
             sender: "You",
             messageNumber: messageCount.current,
@@ -91,7 +102,7 @@ function ChatContainerWithStream() {
           if(response.status!=200){
             const errorResponse=await response.json() as ChatMessageResponse
 
-            chatHistory.current.push({
+            chatHistoryRef.current.push({
               message: "Error making chat request "+errorResponse.message,
               sender:"Ollama",
               messageNumber: messageCount.current,
@@ -106,7 +117,7 @@ function ChatContainerWithStream() {
 
           const reader = response.body.getReader();
           let accumulatedMessage = '';
-          chatHistory.current.push({
+          chatHistoryRef.current.push({
             message: accumulatedMessage,
             sender:"Ollama",
             messageNumber: messageCount.current,
@@ -129,7 +140,7 @@ function ChatContainerWithStream() {
                 const parsedChunk = JSON.parse(line);
                 if (parsedChunk.message?.content) {
                   accumulatedMessage += parsedChunk.message.content;
-                  chatHistory.current.at(-1)!.message = accumulatedMessage;
+                  chatHistoryRef.current.at(-1)!.message = accumulatedMessage;
                   setChatUpdate((prev) => prev + 1);
                 }
               } catch (e) {
@@ -146,16 +157,12 @@ function ChatContainerWithStream() {
         
           messageCount.current += 1;
           setChatUpdate((prev) => prev + 1);
-    }, [selectedModel,temperature,seedValue,seedUsage,systemPrompt,systemPromptUsage]);
+    }, [selectedModel,temperature,seedValue,seedUsage,systemPrompt,systemPromptUsage,chatHistory]);
 
-    useEffect(() => {
-        chatHistory.current = [];
-        messageCount.current = 0;
-        setChatUpdate(0);
-    }, [selectedModel]);
+
 
     return (
-            <ChatContainerLayout chatHistory={chatHistory.current} sendMessage={sendMessage} chatUpdate={chatUpdate} />
+            <ChatContainerLayout chatHistory={chatHistoryRef.current} sendMessage={sendMessage} chatUpdate={chatUpdate} />
     );
 }
 

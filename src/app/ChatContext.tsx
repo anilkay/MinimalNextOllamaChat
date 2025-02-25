@@ -1,6 +1,7 @@
 "use client";
 
-import { createContext, useContext, ReactNode, useRef, useMemo } from 'react';
+import { createContext, useContext, ReactNode, useRef, useMemo, useState, useEffect } from 'react';
+import { ChatHistory } from './page';
 
 interface ChatContextType {
     temperature:() => number,
@@ -15,6 +16,8 @@ interface ChatContextType {
     setSystemPrompt: (value: string)=> void,
     systemPromptUsage:()=>boolean,
     setSystemPromptUsage: (value: boolean)=> void,
+    chatHistory: ChatHistory[],
+    setChatHistory: (value: ChatHistory[])=> void
 }
 
 const ChatContext = createContext<ChatContextType | null>(null);
@@ -27,6 +30,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     const selectedModelRef=useRef("")
     const systemPromptRef=useRef("")
     const systemPromptUsageRef=useRef(false)
+
+    const [chatHistory,setChatHistory]=useState<ChatHistory[]>([]);
     
 
     const setTemperature= (temperature:number)=> {
@@ -63,7 +68,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         systemPromptUsageRef.current=value
     }
     
-    const systemPromptUsage=()=> systemPromptUsageRef.current;
+    const systemPromptUsage=()=> systemPromptUsageRef.current;  
     
     const contextValue = useMemo(() => {
         return {
@@ -78,9 +83,11 @@ export function ChatProvider({ children }: { children: ReactNode }) {
             systemPrompt,
             setSystemPrompt,
             systemPromptUsage,
-            setSystemPromptUsage
+            setSystemPromptUsage,
+            chatHistory,
+            setChatHistory
         };
-    }, []);
+    }, [chatHistory]);
 
     return (
         <ChatContext.Provider value={contextValue}>
