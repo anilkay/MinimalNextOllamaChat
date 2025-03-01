@@ -1,10 +1,10 @@
-import React, { memo, useState } from "react";
+import React, { memo } from "react";
 import { ChatHistory } from "../page";
 import { useChatContext } from "../ChatContext";
 
 export const RestoreChatHistory= () => {
 
-    const { chatHistory, setChatHistory } = useChatContext();
+    const { setChatHistory } = useChatContext();
 
     const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];

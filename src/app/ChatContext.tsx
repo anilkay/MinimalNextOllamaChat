@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, ReactNode, useRef, useMemo, useState, useEffect } from 'react';
+import { createContext, useContext, ReactNode, useRef, useMemo, useState } from 'react';
 import { ChatHistory } from './page';
 
 interface ChatContextType {
