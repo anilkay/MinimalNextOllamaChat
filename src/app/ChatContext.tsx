@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, ReactNode, useRef, useMemo, useState } from 'react';
+import { createContext, useContext, ReactNode, useRef, useMemo, useState, useCallback } from 'react';
 import { ChatHistory } from './page';
 
 interface ChatContextType {
@@ -23,7 +23,7 @@ interface ChatContextType {
 const ChatContext = createContext<ChatContextType | null>(null);
 
 export function ChatProvider({ children }: { children: ReactNode }) {
-    //const [inputValue, setInputValue] = useState("");
+
     const temperatureRef= useRef(0.7);
     const seedValueRef=useRef(0);
     const seedUsageRef=useRef(false);
@@ -34,41 +34,41 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     const [chatHistory,setChatHistory]=useState<ChatHistory[]>([]);
     
 
-    const setTemperature= (temperature:number)=> {
-        temperatureRef.current=temperature
-    }
+    const setTemperature = useCallback((temperature: number) => {
+        temperatureRef.current = temperature;
+    }, [temperatureRef]);
 
-    const temperature= ()=> temperatureRef.current;
+    const temperature = useCallback(() => temperatureRef.current, [temperatureRef]);
 
-   const setSelectedModel= (value: string)=> {
-            selectedModelRef.current=value
-    }
-    
-    const selectedModel=()=> selectedModelRef.current;
+    const setSelectedModel = useCallback((value: string) => {
+            selectedModelRef.current = value
+    }, [selectedModelRef]);
 
-    const setSeedUsage= (value: boolean)=> {
-        seedUsageRef.current=value
-    }
-    
-    const seedUsage=()=> seedUsageRef.current;
+    const selectedModel = useCallback(() => selectedModelRef.current, [selectedModelRef]);
 
-    const setSeedValue= (value: number)=> {
-        seedValueRef.current=value
-    }
-    
-    const seedValue=()=> seedValueRef.current;
+    const setSeedUsage = useCallback((value: boolean) => {
+        seedUsageRef.current = value;
+    }, [seedUsageRef]);
 
-    const setSystemPrompt= (value: string)=> {
-        systemPromptRef.current=value
-    }
-    
-    const systemPrompt=()=> systemPromptRef.current;
+    const seedUsage = useCallback(() => seedUsageRef.current, [seedUsageRef]);
 
-    const setSystemPromptUsage= (value: boolean)=> {
-        systemPromptUsageRef.current=value
-    }
-    
-    const systemPromptUsage=()=> systemPromptUsageRef.current;  
+    const setSeedValue = useCallback((value: number) => {
+        seedValueRef.current = value;
+    }, [seedValueRef]);
+
+    const seedValue = useCallback(() => seedValueRef.current, [seedValueRef]);
+
+    const setSystemPrompt = useCallback((value: string) => {
+        systemPromptRef.current = value;
+    }, [systemPromptRef]);
+
+    const systemPrompt = useCallback(() => systemPromptRef.current, [systemPromptRef]);
+
+    const setSystemPromptUsage = useCallback((value: boolean) => {
+        systemPromptUsageRef.current = value;
+    }, [systemPromptUsageRef]);
+
+    const systemPromptUsage = useCallback(() => systemPromptUsageRef.current, [systemPromptUsageRef]);  
     
     const contextValue = useMemo(() => {
         return {
