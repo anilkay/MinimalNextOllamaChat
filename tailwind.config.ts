@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import { PluginAPI } from "tailwindcss/types/config";
 
 export default {
   content: [
@@ -14,5 +15,13 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    function({ addBase }:PluginAPI) {
+      addBase({
+        "input,textarea,select": {
+          "color": "white",
+        },
+      });
+    },
+  ],
 } satisfies Config;

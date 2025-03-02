@@ -32,9 +32,9 @@ export function SelectModel() {
             ) : (
                 <select
                     className="w-full bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-lg 
-                             px-4 py-2 text-sm border border-gray-700/50 
+                             px-4 py-2 text-sm border border-gray-600 
                              focus:outline-none focus:ring-2 focus:ring-blue-500/50
-                             shadow-lg backdrop-blur-sm"
+                             shadow-lg backdrop-blur-sm font-semibold tracking-wide"
                     value={localSelectedModel}
                     onChange={(e) => handleSelect(e.target.value)}
                 >

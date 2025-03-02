@@ -35,8 +35,9 @@ export const RestoreChatHistory= () => {
                 id="file-upload"
             />
             
-            <label htmlFor="file-upload" className="bg-blue-500 text-white text-sm px-4 py-2 rounded cursor-pointer">
-                Restore Chat History
+            <label htmlFor="file-upload" className="bg-gradient-to-b from-blue-600 to-blue-800 
+               text-white text-sm px-4 py-2 rounded cursor-pointer">
+                <span className="text-gray-200">Restore Chat History</span>
             </label>
         </div>
     );

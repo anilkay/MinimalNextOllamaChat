@@ -12,7 +12,7 @@ export const SliderTemperatureComponent: React.FC = () => {
 
     return (
         <div className="flex flex-col items-center justify-center space-y-4">
-            <label htmlFor="slider" className="text-gray-700 font-medium">
+            <label htmlFor="slider" className="text-gray-400 font-medium">
                 Value: <span className="font-bold">{localTemperature.toFixed(2)}</span>
             </label>
             <input

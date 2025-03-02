@@ -13,7 +13,7 @@ const ButtonLinks= (props:Readonly<ButtonLinkProps>) => {
     return (
         <Link 
             href={props.href}
-            className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg hover:from-blue-500 hover:to-blue-600 transition-all duration-200"
+            className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg hover:from-blue-500 hover:to-blue-600 transition-all duration-200 text-gray-100"
         >
             {props.buttonText}
         </Link>
