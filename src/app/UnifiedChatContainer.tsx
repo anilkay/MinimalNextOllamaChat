@@ -13,7 +13,7 @@ interface UnifiedChatContainerProps {
   useStreaming: boolean;
 }
 
-function UnifiedChatContainer({ useStreaming }: UnifiedChatContainerProps) {
+function UnifiedChatContainer({ useStreaming }: Readonly<UnifiedChatContainerProps>) {
   const [chatHistory, setChatHistory] = useState<ChatHistory[]>([]);
   const [chatUpdate, setChatUpdate] = useState(0);
   

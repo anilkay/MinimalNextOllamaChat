@@ -29,9 +29,7 @@ export class ChatService {
   private messagesHistory: ChatMessageMessageRequest[] = [];
   private chatHistory: ChatHistory[] = [];
   private messageCount = 0;
-  
-  constructor() {}
-  
+    
   // Reset chat service state
   public reset() {
     this.messagesHistory = [];
