@@ -6,18 +6,18 @@ import MessageInput from "./MessageInput";
 const SendMessageComponent = memo(function SendMessageComponent({
     onSendChatMessageAction,
 }: {
-    onSendChatMessageAction: (chatMessage: { message: string; image: File | null }) => void;
+    onSendChatMessageAction: (chatMessage: { message: string; image: File | null }) => Promise<boolean | undefined>
 }) {
 
    
 
 
-    const sendMessage = (chatMessage: { message: string; image: File | null }) => {
+    const sendMessage = async (chatMessage: { message: string; image: File | null }) => {
         if (chatMessage.message.trim() === "") {
             return false;
         }
-        onSendChatMessageAction(chatMessage);
-        return true;
+        const canSend= await onSendChatMessageAction(chatMessage);
+        return canSend;
     };
 
     return (

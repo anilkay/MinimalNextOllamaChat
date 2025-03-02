@@ -5,7 +5,7 @@ import { ChatHistory } from '../page';
 
 interface ChatLayoutProps {
     chatHistory: ChatHistory[]; 
-    sendMessage: (message: { message: string; image: File | null }) => Promise<boolean | undefined> | Promise<void>; 
+    sendMessage: (message: { message: string; image: File | null }) => Promise<boolean | undefined> | Promise<boolean>; 
     chatUpdate: number; 
 }
 

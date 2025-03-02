@@ -3,7 +3,7 @@
 import { memo, useCallback, useState, useRef } from "react";
 
 interface MessageInputProps {
-    onSendChatMessageAction: (chatMessage: { message: string; image: File | null }) => boolean;
+    onSendChatMessageAction: (chatMessage: { message: string; image: File | null }) => Promise<boolean | undefined>;
 }
 
 
@@ -16,8 +16,8 @@ const MessageInput = memo(function MessageInput(props: MessageInputProps) {
         setLocalInputValue(event.currentTarget.value);
     }, []);
 
-    const sendMessage=()=> {
-        const canSend=props.onSendChatMessageAction({ message: localInputValue, image: image });
+    const sendMessage=async ()=> {
+        const canSend=await props.onSendChatMessageAction({ message: localInputValue, image: image });
 
         if(canSend){
             setLocalInputValue("");
