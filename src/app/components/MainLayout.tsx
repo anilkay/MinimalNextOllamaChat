@@ -1,7 +1,7 @@
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import   LeftMenu  from './LeftMenu';
-import { FrontMenu } from './FrontMenu';
+import  FrontMenu from './FrontMenu';
 
 interface MainLayoutProps {
     children: React.ReactNode;

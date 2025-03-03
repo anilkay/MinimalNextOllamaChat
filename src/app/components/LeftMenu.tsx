@@ -1,6 +1,6 @@
 import { memo } from "react";
 import  SeedComponent  from "./SeedComponent";
-import { SystemPromptComponent } from "./SystemPromptComponent";
+import  SystemPromptComponent  from "./SystemPromptComponent";
 import RestoreChatHistory from "./RestoreChatHistory";
 
 

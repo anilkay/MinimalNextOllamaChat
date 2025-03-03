@@ -51,4 +51,4 @@ export function FrontMenu(props:Readonly<FrontMenuProps>){
         </>
     )
 }
-
+export default memo(FrontMenu);
