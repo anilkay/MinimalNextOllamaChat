@@ -21,7 +21,18 @@ A modern, minimalist chat interface for Ollama, built with Next.js and enhanced 
 - A compatible Ollama model (e.g., llama2, mistral, etc.)
 
 ## Getting Started
+## Multi-Architecture Image Support
 
+Starting from version **0.1.7**, all Docker images support both **arm64** and **amd64** architectures. You can pull the appropriate image for your platform without specifying the architecture:
+
+```bash
+docker pull aanilkay/minimalnextollamachat:latest
+```
+```bash
+docker pull aanilkay/minimalnextollamachat:latest_static
+```
+
+Docker will automatically select the correct image for your system (arm64 or amd64).
 1. Clone the repository:
 ```bash
 git clone <your-repo-url>
