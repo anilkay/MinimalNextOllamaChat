@@ -1,3 +1,4 @@
+// original MessageInput before edits
 "use client";
 
 import { memo, useCallback, useState, useRef } from "react";
@@ -14,34 +15,23 @@ const MessageInput = memo(function MessageInput(props: MessageInputProps) {
 
     const handleChange = useCallback((event: React.ChangeEvent<HTMLTextAreaElement>) => {
         setLocalInputValue(event.currentTarget.value);
-        
     }, []);
 
-    const sendMessage = async () => {
-        const messageToSend = localInputValue;
-        setLocalInputValue("");
-        const canSend = await props.onSendChatMessageAction({ message: messageToSend, image: image });
+    const sendMessage=async ()=> {
+        const canSend=await props.onSendChatMessageAction({ message: localInputValue, image: image });
 
-        if (canSend) {
+        if(canSend){
+            setLocalInputValue("");
             setImage(null);
             if (fileInputRef.current) {
                 fileInputRef.current.value = "";
             }
         }
-       
     }
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files?.[0]) {
             setImage(event.target.files[0]);
-        }
-    };
-
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-        // Enter => gönder, Shift+Enter => yeni satır
-        if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
-            e.preventDefault();
-            sendMessage(); // sendMessage'in useCallback ile stabil olması iyi
         }
     };
 
@@ -51,7 +41,6 @@ const MessageInput = memo(function MessageInput(props: MessageInputProps) {
             value={localInputValue}
             className="flex-1 w-full bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 resize-none border border-gray-700/50"
             onChange={handleChange}
-            onKeyDown={handleKeyDown}
             placeholder="Type your message..."
         />
         <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} />

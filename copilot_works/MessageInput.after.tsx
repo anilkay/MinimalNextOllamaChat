@@ -1,3 +1,4 @@
+// modified MessageInput after edits
 "use client";
 
 import { memo, useCallback, useState, useRef } from "react";
