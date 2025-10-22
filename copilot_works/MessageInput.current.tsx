@@ -1,3 +1,4 @@
+// current MessageInput (final in workspace)
 "use client";
 
 import { memo, useCallback, useState, useRef } from "react";
