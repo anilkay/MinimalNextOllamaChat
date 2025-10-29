@@ -1,12 +1,11 @@
 // src/app/UnifiedChatContainer.tsx
 "use client";
 
-import { memo, useCallback, useEffect, useState } from "react";
+import { memo, useCallback, useState } from "react";
 import { useChatContext } from "./ChatContext";
 import { showToast } from "./utils/ToastUtils";
 import ChatContainerLayout from "./components/ChatContainerLayout";
 import { IsModelSelected } from "./utils/ChatControlUtils";
-import { ChatHistory } from "./page";
 import { chatService } from "./Services/ChatService";
 
 interface UnifiedChatContainerProps {
@@ -14,7 +13,6 @@ interface UnifiedChatContainerProps {
 }
 
 function UnifiedChatContainer({ useStreaming }: Readonly<UnifiedChatContainerProps>) {
-  const [chatHistory, setChatHistory] = useState<ChatHistory[]>([]);
   const [chatUpdate, setChatUpdate] = useState(0);
   
   const {
@@ -27,15 +25,11 @@ function UnifiedChatContainer({ useStreaming }: Readonly<UnifiedChatContainerPro
     chatHistory: contextChatHistory
   } = useChatContext();
 
-  // Initialize from context when component mounts
-  useEffect(() => {
-    const history = chatService.setChatHistory(contextChatHistory);
-    setChatHistory(history);
-  }, [contextChatHistory]);
+  // Derive chat history from context - no need for local state
+  const chatHistory = chatService.setChatHistory(contextChatHistory);
 
-  // Message update handler
+  // Message update handler - trigger re-render when messages update
   const handleMessageUpdate = useCallback(() => {
-    setChatHistory(chatService.getChatHistory());
     setChatUpdate(prev => prev + 1);
   }, []);
 

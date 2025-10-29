@@ -87,7 +87,21 @@ export function ChatProvider({ children }: { children: ReactNode }) {
             chatHistory,
             setChatHistory
         };
-    }, [chatHistory]);
+    }, [
+        temperature,
+        setTemperature,
+        seedValue,
+        setSeedValue,
+        seedUsage,
+        setSeedUsage,
+        selectedModel,
+        setSelectedModel,
+        systemPrompt,
+        setSystemPrompt,
+        systemPromptUsage,
+        setSystemPromptUsage,
+        chatHistory
+    ]);
 
     return (
         <ChatContext.Provider value={contextValue}>

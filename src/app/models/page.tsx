@@ -10,10 +10,6 @@ export default function ModelsPage() {
     const [pullModelName, setPullModelName] = useState('');
     const [pullStatus, setPullStatus] = useState('');
 
-    useEffect(() => {
-        loadModels();
-    }, []);
-
     const loadModels = async () => {
         try {
             const result = await GetModels();
@@ -24,6 +20,32 @@ export default function ModelsPage() {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        // Load models on mount
+        let mounted = true;
+        
+        const fetchModels = async () => {
+            try {
+                const result = await GetModels();
+                if (mounted) {
+                    setModels(result.data?.models || []);
+                    setLoading(false);
+                }
+            } catch (error) {
+                if (mounted) {
+                    console.error('Error loading models:', error);
+                    setLoading(false);
+                }
+            }
+        };
+        
+        fetchModels();
+        
+        return () => {
+            mounted = false;
+        };
+    }, []);
 
     const handlePullModel = async () => {
         if (!pullModelName.trim()) return;
