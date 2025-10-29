@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, ReactNode, useRef, useMemo, useState, useCallback } from 'react';
+import { createContext, useContext, ReactNode, useRef, useState, useMemo } from 'react';
 import { ChatHistory } from './page';
 
 interface ChatContextType {
@@ -33,62 +33,59 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
     const [chatHistory,setChatHistory]=useState<ChatHistory[]>([]);
     
-
-    const setTemperature = useCallback((temperature: number) => {
+    const setTemperature = (temperature: number) => {
         temperatureRef.current = temperature;
-    }, [temperatureRef]);
+    };
 
-    const temperature = useCallback(() => temperatureRef.current, [temperatureRef]);
+    const temperature = () => temperatureRef.current;
 
-    const setSelectedModel = useCallback((value: string) => {
+    const setSelectedModel = (value: string) => {
             selectedModelRef.current = value
-    }, [selectedModelRef]);
+    };
 
-    const selectedModel = useCallback(() => selectedModelRef.current, [selectedModelRef]);
+    const selectedModel = () => selectedModelRef.current;
 
-    const setSeedUsage = useCallback((value: boolean) => {
+    const setSeedUsage = (value: boolean) => {
         seedUsageRef.current = value;
-    }, [seedUsageRef]);
+    };
 
-    const seedUsage = useCallback(() => seedUsageRef.current, [seedUsageRef]);
+    const seedUsage = () => seedUsageRef.current;
 
-    const setSeedValue = useCallback((value: number) => {
+    const setSeedValue = (value: number) => {
         seedValueRef.current = value;
-    }, [seedValueRef]);
+    };
 
-    const seedValue = useCallback(() => seedValueRef.current, [seedValueRef]);
+    const seedValue = () => seedValueRef.current;
 
-    const setSystemPrompt = useCallback((value: string) => {
+    const setSystemPrompt = (value: string) => {
         systemPromptRef.current = value;
-    }, [systemPromptRef]);
+    };
 
-    const systemPrompt = useCallback(() => systemPromptRef.current, [systemPromptRef]);
+    const systemPrompt = () => systemPromptRef.current;
 
-    const setSystemPromptUsage = useCallback((value: boolean) => {
+    const setSystemPromptUsage = (value: boolean) => {
         systemPromptUsageRef.current = value;
-    }, [systemPromptUsageRef]);
+    };
 
-    const systemPromptUsage = useCallback(() => systemPromptUsageRef.current, [systemPromptUsageRef]);  
+    const systemPromptUsage = () => systemPromptUsageRef.current;
+
+    const contextValue = useMemo(() => ({
+        temperature,
+        setTemperature,
+        seedValue,
+        setSeedValue,
+        seedUsage,
+        setSeedUsage,
+        selectedModel,
+        setSelectedModel,
+        systemPrompt,
+        setSystemPrompt,
+        systemPromptUsage,
+        setSystemPromptUsage,
+        chatHistory,
+        setChatHistory
+    }), [chatHistory, setChatHistory]);
     
-    const contextValue = useMemo(() => {
-        return {
-            temperature,
-            setTemperature,
-            seedValue,
-            setSeedValue,
-            seedUsage,
-            setSeedUsage,
-            selectedModel,
-            setSelectedModel,
-            systemPrompt,
-            setSystemPrompt,
-            systemPromptUsage,
-            setSystemPromptUsage,
-            chatHistory,
-            setChatHistory
-        };
-    }, [chatHistory]);
-
     return (
         <ChatContext.Provider value={contextValue}>
             {children}

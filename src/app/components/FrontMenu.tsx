@@ -1,7 +1,6 @@
 import Link from "next/link"
 import { SelectModel } from "./SelectModel"
 import SliderTemperatureComponent  from "./SliderTemperatureComponent"
-import { memo } from "react";
 
 
 interface ButtonLinkProps {
@@ -26,13 +25,11 @@ interface FrontMenuProps {
     leftLinkHref: string;
 }
 
-const MemoizedButtonLinks = memo(ButtonLinks);
-
 export function FrontMenu(props:Readonly<FrontMenuProps>){
     return  (
         <>
         <div className="flex flex-col items-center gap-2">
-            <MemoizedButtonLinks 
+            <ButtonLinks 
             href={props.leftLinkHref}
             buttonText={props.leftLinkText} 
             />
@@ -45,10 +42,10 @@ export function FrontMenu(props:Readonly<FrontMenuProps>){
 
             <div>
             <div className="flex flex-col items-center gap-2">
-                <MemoizedButtonLinks href="/models" buttonText="Manage Models" />
+                <ButtonLinks href="/models" buttonText="Manage Models" />
             </div>
         </div>
         </>
     )
 }
-export default memo(FrontMenu);
+export default FrontMenu;

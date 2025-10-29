@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import React from "react";
 import { ChatHistory } from "../page";
 import { useChatContext } from "../ChatContext";
 
@@ -43,4 +43,4 @@ export const RestoreChatHistory= () => {
     );
 };
 
-export default  memo(RestoreChatHistory);
+export default RestoreChatHistory;
