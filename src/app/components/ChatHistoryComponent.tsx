@@ -1,6 +1,6 @@
 "use client";
 import {ChatHistory} from "@/app/page";
-import {FC, memo} from "react";
+import {FC} from "react";
 
 const exportChatHistory = (chatHistory: ChatHistory[]) => {
     const json = JSON.stringify(chatHistory, null, 2);
@@ -43,4 +43,4 @@ const ChatHistoryComponent: FC<{ chathistory: ChatHistory[] }> = ({ chathistory 
     );
 };
 
-export default memo(ChatHistoryComponent);
+export default ChatHistoryComponent;

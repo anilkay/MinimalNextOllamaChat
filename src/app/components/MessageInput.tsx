@@ -1,21 +1,21 @@
 "use client";
 
-import { memo, useCallback, useState, useRef } from "react";
+import { useState, useRef } from "react";
 
 interface MessageInputProps {
     onSendChatMessageAction: (chatMessage: { message: string; image: File | null }) => Promise<boolean | undefined>;
 }
 
 
-const MessageInput = memo(function MessageInput(props: MessageInputProps) {
+const MessageInput = function MessageInput(props: MessageInputProps) {
     const [localInputValue, setLocalInputValue] = useState("");
     const [ image, setImage] = useState<File | null>(null);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-    const handleChange = useCallback((event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
         setLocalInputValue(event.currentTarget.value);
         
-    }, []);
+    };
 
     const sendMessage = async () => {
         const messageToSend = localInputValue;
@@ -41,7 +41,7 @@ const MessageInput = memo(function MessageInput(props: MessageInputProps) {
         // Enter => gönder, Shift+Enter => yeni satır
         if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
             e.preventDefault();
-            sendMessage(); // sendMessage'in useCallback ile stabil olması iyi
+            sendMessage();
         }
     };
 
@@ -64,6 +64,6 @@ const MessageInput = memo(function MessageInput(props: MessageInputProps) {
             </button>
         </>
     );
-});
+};
 
 export default MessageInput;

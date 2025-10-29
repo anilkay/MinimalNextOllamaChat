@@ -1,4 +1,3 @@
-import { memo } from "react";
 import  SeedComponent  from "./SeedComponent";
 import  SystemPromptComponent  from "./SystemPromptComponent";
 import RestoreChatHistory from "./RestoreChatHistory";
@@ -14,5 +13,5 @@ export function LeftMenu() {
     );
 }
 
-export default memo(LeftMenu);
+export default LeftMenu;
 
