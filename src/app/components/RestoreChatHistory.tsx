@@ -1,7 +1,8 @@
-import React, { memo } from "react";
+import React from "react";
 import { ChatHistory } from "../page";
 import { useChatContext } from "../ChatContext";
 
+// React Compiler handles component optimization automatically
 export const RestoreChatHistory= () => {
 
     const { setChatHistory } = useChatContext();
@@ -43,4 +44,4 @@ export const RestoreChatHistory= () => {
     );
 };
 
-export default  memo(RestoreChatHistory);
+export default RestoreChatHistory;

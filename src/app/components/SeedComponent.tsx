@@ -1,6 +1,7 @@
-import { memo, useState } from "react";
+import { useState } from "react";
 import { useChatContext } from "../ChatContext";
 
+// React Compiler handles component optimization automatically
 export function SeedComponent() {
     const {seedUsage, setSeedUsage,seedValue, setSeedValue} = useChatContext();
     const [localSeedValue, setLocalSeedValue] = useState(seedValue);
@@ -37,4 +38,4 @@ return (
 )
 }
 
-export default memo(SeedComponent);
+export default SeedComponent;

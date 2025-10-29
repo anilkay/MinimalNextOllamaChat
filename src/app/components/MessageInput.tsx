@@ -1,13 +1,13 @@
 "use client";
 
-import { memo, useState, useRef } from "react";
+import { useState, useRef } from "react";
 
 interface MessageInputProps {
     onSendChatMessageAction: (chatMessage: { message: string; image: File | null }) => Promise<boolean | undefined>;
 }
 
-
-const MessageInput = memo(function MessageInput(props: MessageInputProps) {
+// React Compiler handles component optimization automatically
+function MessageInput(props: MessageInputProps) {
     const [localInputValue, setLocalInputValue] = useState("");
     const [ image, setImage] = useState<File | null>(null);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -64,6 +64,6 @@ const MessageInput = memo(function MessageInput(props: MessageInputProps) {
             </button>
         </>
     );
-});
+}
 
 export default MessageInput;

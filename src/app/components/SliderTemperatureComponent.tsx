@@ -1,6 +1,7 @@
-import React, { useState, memo } from "react";
+import React, { useState } from "react";
 import { useChatContext } from "../ChatContext";
 
+// React Compiler handles component optimization automatically
 export const SliderTemperatureComponent: React.FC = () => {
      const { temperature,setTemperature } = useChatContext();
      const [localTemperature,setLocalTemperature]= useState(temperature);
@@ -30,4 +31,4 @@ export const SliderTemperatureComponent: React.FC = () => {
     );
 };
 
-export default memo(SliderTemperatureComponent);
+export default SliderTemperatureComponent;

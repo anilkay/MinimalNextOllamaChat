@@ -1,9 +1,9 @@
 "use client";
 
-import { memo } from "react";
 import MessageInput from "./MessageInput";
 
-const SendMessageComponent = memo(function SendMessageComponent({
+// React Compiler handles component optimization automatically
+const SendMessageComponent = function SendMessageComponent({
     onSendChatMessageAction,
 }: {
     onSendChatMessageAction: (chatMessage: { message: string; image: File | null }) => Promise<boolean | undefined>
@@ -25,6 +25,6 @@ const SendMessageComponent = memo(function SendMessageComponent({
             <MessageInput onSendChatMessageAction={sendMessage}/>
         </div>
     );
-});
+};
 
 export { SendMessageComponent };

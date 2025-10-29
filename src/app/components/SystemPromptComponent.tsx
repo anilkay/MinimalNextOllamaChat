@@ -1,6 +1,7 @@
-import { memo, useState } from "react";
+import { useState } from "react";
 import { useChatContext } from "../ChatContext"
 
+// React Compiler handles component optimization automatically
 export const SystemPromptComponent: React.FC = () => {
     const { systemPrompt, setSystemPrompt, systemPromptUsage, setSystemPromptUsage } = useChatContext();
     const [localSystemPrompt, setLocalSystemPrompt] = useState(systemPrompt);
@@ -38,4 +39,4 @@ export const SystemPromptComponent: React.FC = () => {
     )
 }
 
-export default memo(SystemPromptComponent);
+export default SystemPromptComponent;
