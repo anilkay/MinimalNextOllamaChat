@@ -1,7 +1,7 @@
 // src/app/UnifiedChatContainer.tsx
 "use client";
 
-import { memo, useState } from "react";
+import { useState } from "react";
 import { useChatContext } from "./ChatContext";
 import { showToast } from "./utils/ToastUtils";
 import ChatContainerLayout from "./components/ChatContainerLayout";
@@ -12,6 +12,7 @@ interface UnifiedChatContainerProps {
   useStreaming: boolean;
 }
 
+// React Compiler handles component optimization automatically
 function UnifiedChatContainer({ useStreaming }: Readonly<UnifiedChatContainerProps>) {
   const [chatUpdate, setChatUpdate] = useState(0);
   
@@ -88,4 +89,4 @@ function UnifiedChatContainer({ useStreaming }: Readonly<UnifiedChatContainerPro
   );
 }
 
-export default memo(UnifiedChatContainer);
+export default UnifiedChatContainer;
