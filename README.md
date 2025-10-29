@@ -142,10 +142,23 @@ This will map port 3000 on your host to port 80 in the container.
 
 ## Technologies Used
 
-- [Next.js](https://nextjs.org/) - React framework
+- [Next.js 16](https://nextjs.org/) - React framework with Turbopack
+- [React 19](https://react.dev/) - UI library with React Compiler enabled
 - [Tailwind CSS](https://tailwindcss.com/) - Styling
 - [Ollama](https://ollama.ai) - Local LLM runtime
 - Windsurf - AI assistance for development
+
+## Performance Optimizations
+
+This project leverages the **React Compiler** (stable in React 19) for automatic performance optimizations:
+
+- ✅ Automatic component memoization
+- ✅ Automatic callback and value memoization
+- ✅ No manual `memo()`, `useCallback()`, or `useMemo()` needed for most cases
+- ✅ Smaller bundle size and better runtime performance
+- ✅ Cleaner, more maintainable code
+
+The React Compiler is enabled in `next.config.ts` with `reactCompiler: true` and optimizes the entire application automatically at build time.
 
 ## Development Notes
 
