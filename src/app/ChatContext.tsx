@@ -84,7 +84,9 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         setSystemPromptUsage,
         chatHistory,
         setChatHistory
-    };    return (
+    };
+
+    return (
         <ChatContext.Provider value={contextValue}>
             {children}
         </ChatContext.Provider>
