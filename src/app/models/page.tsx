@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, use, useMemo, useState } from 'react';
+import { Suspense, use, useState } from 'react';
 import { GetModels, Model, PullModel, DeleteModel } from '../Services/OllamaService';
 import Link from 'next/link';
 
