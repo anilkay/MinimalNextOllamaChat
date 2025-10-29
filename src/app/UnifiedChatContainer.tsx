@@ -30,7 +30,7 @@ function UnifiedChatContainer({ useStreaming }: Readonly<UnifiedChatContainerPro
   // Initialize from context when component mounts
   useEffect(() => {
     const history = chatService.setChatHistory(contextChatHistory);
-    setChatHistory(history);
+    setTimeout(() => setChatHistory(history), 0); // Asyncronous update
   }, [contextChatHistory]);
 
   // Message update handler
