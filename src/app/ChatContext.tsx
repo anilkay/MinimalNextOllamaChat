@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, ReactNode, useRef, useMemo, useState } from 'react';
+import { createContext, useContext, ReactNode, useRef, useMemo, useState, useCallback } from 'react';
 import { ChatHistory } from './page';
 
 interface ChatContextType {
@@ -33,44 +33,46 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
     const [chatHistory,setChatHistory]=useState<ChatHistory[]>([]);
     
-    // With React Compiler, these simple functions don't need useCallback
-    const setTemperature = (temperature: number) => {
+    // These functions access refs and have no reactive dependencies
+    // useCallback with empty deps ensures stable references for context
+    const setTemperature = useCallback((temperature: number) => {
         temperatureRef.current = temperature;
-    };
+    }, []);
 
-    const temperature = () => temperatureRef.current;
+    const temperature = useCallback(() => temperatureRef.current, []);
 
-    const setSelectedModel = (value: string) => {
+    const setSelectedModel = useCallback((value: string) => {
         selectedModelRef.current = value
-    };
+    }, []);
 
-    const selectedModel = () => selectedModelRef.current;
+    const selectedModel = useCallback(() => selectedModelRef.current, []);
 
-    const setSeedUsage = (value: boolean) => {
+    const setSeedUsage = useCallback((value: boolean) => {
         seedUsageRef.current = value;
-    };
+    }, []);
 
-    const seedUsage = () => seedUsageRef.current;
+    const seedUsage = useCallback(() => seedUsageRef.current, []);
 
-    const setSeedValue = (value: number) => {
+    const setSeedValue = useCallback((value: number) => {
         seedValueRef.current = value;
-    };
+    }, []);
 
-    const seedValue = () => seedValueRef.current;
+    const seedValue = useCallback(() => seedValueRef.current, []);
 
-    const setSystemPrompt = (value: string) => {
+    const setSystemPrompt = useCallback((value: string) => {
         systemPromptRef.current = value;
-    };
+    }, []);
 
-    const systemPrompt = () => systemPromptRef.current;
+    const systemPrompt = useCallback(() => systemPromptRef.current, []);
 
-    const setSystemPromptUsage = (value: boolean) => {
+    const setSystemPromptUsage = useCallback((value: boolean) => {
         systemPromptUsageRef.current = value;
-    };
+    }, []);
 
-    const systemPromptUsage = () => systemPromptUsageRef.current;  
+    const systemPromptUsage = useCallback(() => systemPromptUsageRef.current, []);  
     
-    // Keep useMemo for context value to prevent unnecessary re-renders
+    // Context value only changes when chatHistory changes
+    // All callback functions are stable due to useCallback with empty deps
     const contextValue = useMemo(() => {
         return {
             temperature,
@@ -88,7 +90,22 @@ export function ChatProvider({ children }: { children: ReactNode }) {
             chatHistory,
             setChatHistory
         };
-    }, [chatHistory]);
+    }, [
+        temperature,
+        setTemperature,
+        seedValue,
+        setSeedValue,
+        seedUsage,
+        setSeedUsage,
+        selectedModel,
+        setSelectedModel,
+        systemPrompt,
+        setSystemPrompt,
+        systemPromptUsage,
+        setSystemPromptUsage,
+        chatHistory,
+        setChatHistory
+    ]);
 
     return (
         <ChatContext.Provider value={contextValue}>
