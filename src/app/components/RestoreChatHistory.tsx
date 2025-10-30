@@ -2,9 +2,15 @@ import React from "react";
 import { ChatHistory } from "../page";
 import { useChatContext } from "../ChatContext";
 
+interface ExportedChatData {
+    chatHistory: ChatHistory[];
+    systemPrompt?: string;
+    systemPromptUsage?: boolean;
+}
+
 export const RestoreChatHistory= () => {
 
-    const { setChatHistory } = useChatContext();
+    const { setChatHistory, setSystemPrompt, setSystemPromptUsage } = useChatContext();
 
     const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
@@ -15,8 +21,29 @@ export const RestoreChatHistory= () => {
         reader.onload = (e) => {
             try {
                 const text = e.target?.result as string;
-                const chatHistory: ChatHistory[] = JSON.parse(text);
-                setChatHistory(chatHistory);
+                const parsedData = JSON.parse(text);
+                
+                // Check if it's the new format (object with chatHistory property)
+                if (parsedData.chatHistory && Array.isArray(parsedData.chatHistory)) {
+                    const data = parsedData as ExportedChatData;
+                    setChatHistory(data.chatHistory);
+                    
+                    // Restore system prompt if present
+                    if (data.systemPrompt !== undefined) {
+                        setSystemPrompt(data.systemPrompt);
+                    }
+                    if (data.systemPromptUsage !== undefined) {
+                        setSystemPromptUsage(data.systemPromptUsage);
+                    }
+                } else if (Array.isArray(parsedData)) {
+                    // Handle old format (just an array of messages)
+                    const chatHistory: ChatHistory[] = parsedData;
+                    setChatHistory(chatHistory);
+                } else {
+                    const errorMsg = "Invalid format: Expected an array of messages or object with chatHistory property";
+                    console.error(errorMsg);
+                    throw new Error(errorMsg);
+                }
             } catch (error) {
                 console.error("Error parsing JSON file:", error);
             }

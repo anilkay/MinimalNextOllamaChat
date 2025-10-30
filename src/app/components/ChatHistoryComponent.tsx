@@ -1,9 +1,15 @@
 "use client";
 import {ChatHistory} from "@/app/page";
 import {FC} from "react";
+import { useChatContext } from "../ChatContext";
 
-const exportChatHistory = (chatHistory: ChatHistory[]) => {
-    const json = JSON.stringify(chatHistory, null, 2);
+const exportChatHistory = (chatHistory: ChatHistory[], systemPrompt: string, systemPromptUsage: boolean) => {
+    const exportData = {
+        chatHistory,
+        systemPrompt,
+        systemPromptUsage
+    };
+    const json = JSON.stringify(exportData, null, 2);
     const blob = new Blob([json], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -16,10 +22,11 @@ const exportChatHistory = (chatHistory: ChatHistory[]) => {
 };
 
 const ChatHistoryComponent: FC<{ chathistory: ChatHistory[] }> = ({ chathistory }) => {
+    const { systemPrompt, systemPromptUsage } = useChatContext();
     return (
         <div className="flex flex-col space-y-4 py-4">
             <button 
-                onClick={() => exportChatHistory(chathistory)} 
+                onClick={() => exportChatHistory(chathistory, systemPrompt(), systemPromptUsage())} 
                 className="bg-blue-500 text-gray-200 rounded-lg px-4 py-2 hover:bg-blue-600 transition duration-200 ease-in-out dark:bg-gray-700 dark:hover:bg-gray-600"
                 aria-label="Save Conversation"
             >
