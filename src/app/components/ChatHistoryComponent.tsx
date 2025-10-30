@@ -6,7 +6,7 @@ import { useChatContext } from "../ChatContext";
 const exportChatHistory = (chatHistory: ChatHistory[], systemPrompt: string, systemPromptUsage: boolean) => {
     const exportData = {
         chatHistory,
-        systemPrompt: systemPromptUsage ? systemPrompt : undefined,
+        systemPrompt,
         systemPromptUsage
     };
     const json = JSON.stringify(exportData, null, 2);

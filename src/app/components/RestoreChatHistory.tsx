@@ -39,6 +39,9 @@ export const RestoreChatHistory= () => {
                     // Handle old format (just an array of messages)
                     const chatHistory: ChatHistory[] = parsedData;
                     setChatHistory(chatHistory);
+                } else {
+                    console.error("Invalid chat history format");
+                    throw new Error("Invalid chat history format");
                 }
             } catch (error) {
                 console.error("Error parsing JSON file:", error);
