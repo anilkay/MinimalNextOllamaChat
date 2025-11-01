@@ -1,7 +1,7 @@
 "use client";
 
 import { create } from 'zustand';
-import { devtools, persist } from 'zustand/middleware';
+import { devtools } from 'zustand/middleware';
 import { ChatHistory } from '@/types/chat';
 
 interface ChatStore {
@@ -26,30 +26,25 @@ interface ChatStore {
 
 export const useChatStore = create<ChatStore>()(
   devtools(
-    persist(
-      (set) => ({
-        // Initial state
-        temperature: 0.7,
-        seedValue: 0,
-        seedUsage: false,
-        selectedModel: "",
-        systemPrompt: "",
-        systemPromptUsage: false,
-        chatHistory: [],
-        
-        // Actions
-        setTemperature: (value) => set({ temperature: value }),
-        setSeedValue: (value) => set({ seedValue: value }),
-        setSeedUsage: (value) => set({ seedUsage: value }),
-        setSelectedModel: (value) => set({ selectedModel: value }),
-        setSystemPrompt: (value) => set({ systemPrompt: value }),
-        setSystemPromptUsage: (value) => set({ systemPromptUsage: value }),
-        setChatHistory: (value) => set({ chatHistory: value }),
-      }),
-      {
-        name: 'chat-storage', // name of item in localStorage
-      }
-    ),
+    (set) => ({
+      // Initial state
+      temperature: 0.7,
+      seedValue: 0,
+      seedUsage: false,
+      selectedModel: "",
+      systemPrompt: "",
+      systemPromptUsage: false,
+      chatHistory: [],
+      
+      // Actions
+      setTemperature: (value) => set({ temperature: value }),
+      setSeedValue: (value) => set({ seedValue: value }),
+      setSeedUsage: (value) => set({ seedUsage: value }),
+      setSelectedModel: (value) => set({ selectedModel: value }),
+      setSystemPrompt: (value) => set({ systemPrompt: value }),
+      setSystemPromptUsage: (value) => set({ systemPromptUsage: value }),
+      setChatHistory: (value) => set({ chatHistory: value }),
+    }),
     {
       name: 'ChatStore', // name for devtools
     }
