@@ -2,13 +2,11 @@ import { useState } from "react";
 import { useChatStore } from "../stores/useChatStore";
 
 export const SystemPromptComponent: React.FC = () => {
-    const systemPrompt = useChatStore((state) => state.systemPrompt);
     const setSystemPrompt = useChatStore((state) => state.setSystemPrompt);
-    const systemPromptUsage = useChatStore((state) => state.systemPromptUsage);
     const setSystemPromptUsage = useChatStore((state) => state.setSystemPromptUsage);
     
-    const [localSystemPrompt, setLocalSystemPrompt] = useState(systemPrompt);
-    const [localSystemPromptUsage, setLocalSystemPromptUsage] = useState(systemPromptUsage);
+    const [localSystemPrompt, setLocalSystemPrompt] = useState("");
+    const [localSystemPromptUsage, setLocalSystemPromptUsage] = useState(false);
 
     const handleSystemPromptUsageChange = (checked: boolean) => {
         setLocalSystemPromptUsage(checked);

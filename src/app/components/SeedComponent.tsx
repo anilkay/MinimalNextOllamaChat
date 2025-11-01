@@ -2,13 +2,11 @@ import { useState } from "react";
 import { useChatStore } from "../stores/useChatStore";
 
 export function SeedComponent() {
-    const seedUsage = useChatStore((state) => state.seedUsage);
     const setSeedUsage = useChatStore((state) => state.setSeedUsage);
-    const seedValue = useChatStore((state) => state.seedValue);
     const setSeedValue = useChatStore((state) => state.setSeedValue);
     
-    const [localSeedValue, setLocalSeedValue] = useState(seedValue);
-    const [localSeedUsage, setLocalSeedUsage] = useState(seedUsage);
+    const [localSeedValue, setLocalSeedValue] = useState(0);
+    const [localSeedUsage, setLocalSeedUsage] = useState(false);
 
     const handleSeedUsageChange = (checked: boolean) => {
         setLocalSeedUsage(checked);

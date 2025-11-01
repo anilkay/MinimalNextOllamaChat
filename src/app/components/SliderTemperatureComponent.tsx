@@ -2,13 +2,13 @@ import React, { useState } from "react";
 import { useChatStore } from "../stores/useChatStore";
 
 export const SliderTemperatureComponent: React.FC = () => {
-     const temperature = useChatStore((state) => state.temperature);
      const setTemperature = useChatStore((state) => state.setTemperature);
-     const [localTemperature,setLocalTemperature]= useState(temperature);
+     const [localTemperature,setLocalTemperature]= useState(0.7);
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setTemperature(parseFloat(event.target.value));
-        setLocalTemperature(parseFloat(event.target.value));
+        const value = parseFloat(event.target.value);
+        setTemperature(value);
+        setLocalTemperature(value);
     };
 
     return (
