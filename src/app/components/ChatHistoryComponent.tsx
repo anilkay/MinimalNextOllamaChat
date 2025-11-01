@@ -1,32 +1,34 @@
 "use client";
-import {ChatHistory} from "@/app/page";
-import {FC} from "react";
-import { useChatContext } from "../ChatContext";
+import { ChatHistory } from "@/types/chat";
+import { FC, memo } from "react";
+import { useChatStore } from "../stores/useChatStore";
 
-const exportChatHistory = (chatHistory: ChatHistory[], systemPrompt: string, systemPromptUsage: boolean) => {
-    const exportData = {
-        chatHistory,
-        systemPrompt,
-        systemPromptUsage
+const ChatHistoryComponent: FC<{ chathistory: ChatHistory[] }> = memo(({ chathistory }) => {
+    const handleExport = () => {
+        const systemPrompt = useChatStore.getState().systemPrompt;
+        const systemPromptUsage = useChatStore.getState().systemPromptUsage;
+        
+        const exportData = {
+            chatHistory: chathistory,
+            systemPrompt,
+            systemPromptUsage
+        };
+        const json = JSON.stringify(exportData, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'chatHistory.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     };
-    const json = JSON.stringify(exportData, null, 2);
-    const blob = new Blob([json], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'chatHistory.json';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-};
 
-const ChatHistoryComponent: FC<{ chathistory: ChatHistory[] }> = ({ chathistory }) => {
-    const { systemPrompt, systemPromptUsage } = useChatContext();
     return (
         <div className="flex flex-col space-y-4 py-4">
             <button 
-                onClick={() => exportChatHistory(chathistory, systemPrompt(), systemPromptUsage())} 
+                onClick={handleExport} 
                 className="bg-blue-500 text-gray-200 rounded-lg px-4 py-2 hover:bg-blue-600 transition duration-200 ease-in-out dark:bg-gray-700 dark:hover:bg-gray-600"
                 aria-label="Save Conversation"
             >
@@ -48,6 +50,8 @@ const ChatHistoryComponent: FC<{ chathistory: ChatHistory[] }> = ({ chathistory 
             ))}
         </div>
     );
-};
+});
+
+ChatHistoryComponent.displayName = 'ChatHistoryComponent';
 
 export default ChatHistoryComponent;

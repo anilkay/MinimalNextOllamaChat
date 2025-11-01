@@ -12,7 +12,8 @@
     "next": "^16.0.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-toastify": "^11.0.3"
+    "react-toastify": "^11.0.3",
+    "zustand": "^5.0.8"
   },
   "devDependencies": {
     "@types/node": "^20",

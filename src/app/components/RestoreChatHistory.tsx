@@ -1,6 +1,6 @@
 import React from "react";
-import { ChatHistory } from "../page";
-import { useChatContext } from "../ChatContext";
+import { ChatHistory } from "@/types/chat";
+import { useChatStore } from "../stores/useChatStore";
 
 interface ExportedChatData {
     chatHistory: ChatHistory[];
@@ -10,7 +10,9 @@ interface ExportedChatData {
 
 export const RestoreChatHistory= () => {
 
-    const { setChatHistory, setSystemPrompt, setSystemPromptUsage } = useChatContext();
+    const setChatHistory = useChatStore((state) => state.setChatHistory);
+    const setSystemPrompt = useChatStore((state) => state.setSystemPrompt);
+    const setSystemPromptUsage = useChatStore((state) => state.setSystemPromptUsage);
 
     const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];

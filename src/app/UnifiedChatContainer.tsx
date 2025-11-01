@@ -1,12 +1,12 @@
 // src/app/UnifiedChatContainer.tsx
 "use client";
 
-import { useEffect, useState } from "react";
-import { useChatContext } from "./ChatContext";
+import { useEffect, useState, useCallback } from "react";
+import { useChatStore } from "./stores/useChatStore";
 import { showToast } from "./utils/ToastUtils";
 import ChatContainerLayout from "./components/ChatContainerLayout";
 import { IsModelSelected } from "./utils/ChatControlUtils";
-import { ChatHistory } from "./page";
+import { ChatHistory } from "@/types/chat";
 import { chatService } from "./Services/ChatService";
 
 interface UnifiedChatContainerProps {
@@ -17,15 +17,8 @@ function UnifiedChatContainer({ useStreaming }: Readonly<UnifiedChatContainerPro
   const [chatHistory, setChatHistory] = useState<ChatHistory[]>([]);
   const [chatUpdate, setChatUpdate] = useState(0);
   
-  const {
-    temperature,
-    seedValue,
-    seedUsage,
-    selectedModel,
-    systemPrompt,
-    systemPromptUsage,
-    chatHistory: contextChatHistory
-  } = useChatContext();
+  // Only subscribe to chatHistory since we need to react to changes
+  const contextChatHistory = useChatStore((state) => state.chatHistory);
 
   // Initialize from context when component mounts
   useEffect(() => {
@@ -33,32 +26,35 @@ function UnifiedChatContainer({ useStreaming }: Readonly<UnifiedChatContainerPro
     setTimeout(() => setChatHistory(history), 0); // Asyncronous update
   }, [contextChatHistory]);
 
-  // Message update handler
-  const handleMessageUpdate = () => {
+  // Message update handler - memoized to prevent recreating on every render
+  const handleMessageUpdate = useCallback(() => {
     setChatHistory(chatService.getChatHistory());
     setChatUpdate(prev => prev + 1);
-  };
+  }, []);
 
-  // Send message handler
-  const sendMessage = async({ 
+  // Send message handler - memoized to prevent recreating on every render
+  const sendMessage = useCallback(async({ 
     message, 
     image 
   }: { 
     message: string; 
     image: File | null 
   }) => {
-    if (!IsModelSelected(selectedModel())) {
+    // Read values from store only when needed, without subscribing
+    const state = useChatStore.getState();
+    
+    if (!IsModelSelected(state.selectedModel)) {
       showToast('error', "Please select a model first");
       return false;
     }
 
     const chatOptions = {
-      temperature: temperature(),
-      seedValue: seedValue(),
-      seedUsage: seedUsage(),
-      selectedModel: selectedModel(),
-      systemPrompt: systemPrompt(),
-      systemPromptUsage: systemPromptUsage()
+      temperature: state.temperature,
+      seedValue: state.seedValue,
+      seedUsage: state.seedUsage,
+      selectedModel: state.selectedModel,
+      systemPrompt: state.systemPrompt,
+      systemPromptUsage: state.systemPromptUsage
     };
 
     let success = false;
@@ -81,7 +77,7 @@ function UnifiedChatContainer({ useStreaming }: Readonly<UnifiedChatContainerPro
     }
 
     return success;
-  };
+  }, [useStreaming, handleMessageUpdate]);
 
   return (
     <ChatContainerLayout 

@@ -1,5 +1,5 @@
 // src/app/Services/ChatService.ts
-import { ChatHistory } from "../page";
+import { ChatHistory } from "@/types/chat";
 import { 
   ChatMessageMessageRequest, 
   ChatMessageResponse, 

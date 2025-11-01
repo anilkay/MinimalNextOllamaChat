@@ -2,13 +2,13 @@
 
 import {useEffect, useState} from "react";
 import {GetModels, Model} from "@/app/Services/OllamaService";
-import { useChatContext } from "../ChatContext";
+import { useChatStore } from "../stores/useChatStore";
 
 export function SelectModel() {
     const [models, setModels] = useState<Model[]|undefined>([]);
     const [loading, setLoading] = useState(true);
     const [localSelectedModel, setLocalSelectedModel] = useState("");
-    const {setSelectedModel} = useChatContext();
+    const setSelectedModel = useChatStore((state) => state.setSelectedModel);
     const error= null
 
     useEffect(() => {
