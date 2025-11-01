@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useChatContext } from "./ChatContext";
+import { useChatStore } from "./stores/useChatStore";
 import { showToast } from "./utils/ToastUtils";
 import ChatContainerLayout from "./components/ChatContainerLayout";
 import { IsModelSelected } from "./utils/ChatControlUtils";
@@ -17,15 +17,14 @@ function UnifiedChatContainer({ useStreaming }: Readonly<UnifiedChatContainerPro
   const [chatHistory, setChatHistory] = useState<ChatHistory[]>([]);
   const [chatUpdate, setChatUpdate] = useState(0);
   
-  const {
-    temperature,
-    seedValue,
-    seedUsage,
-    selectedModel,
-    systemPrompt,
-    systemPromptUsage,
-    chatHistory: contextChatHistory
-  } = useChatContext();
+  // Use Zustand selectors for better performance
+  const temperature = useChatStore((state) => state.temperature);
+  const seedValue = useChatStore((state) => state.seedValue);
+  const seedUsage = useChatStore((state) => state.seedUsage);
+  const selectedModel = useChatStore((state) => state.selectedModel);
+  const systemPrompt = useChatStore((state) => state.systemPrompt);
+  const systemPromptUsage = useChatStore((state) => state.systemPromptUsage);
+  const contextChatHistory = useChatStore((state) => state.chatHistory);
 
   // Initialize from context when component mounts
   useEffect(() => {
@@ -47,18 +46,18 @@ function UnifiedChatContainer({ useStreaming }: Readonly<UnifiedChatContainerPro
     message: string; 
     image: File | null 
   }) => {
-    if (!IsModelSelected(selectedModel())) {
+    if (!IsModelSelected(selectedModel)) {
       showToast('error', "Please select a model first");
       return false;
     }
 
     const chatOptions = {
-      temperature: temperature(),
-      seedValue: seedValue(),
-      seedUsage: seedUsage(),
-      selectedModel: selectedModel(),
-      systemPrompt: systemPrompt(),
-      systemPromptUsage: systemPromptUsage()
+      temperature: temperature,
+      seedValue: seedValue,
+      seedUsage: seedUsage,
+      selectedModel: selectedModel,
+      systemPrompt: systemPrompt,
+      systemPromptUsage: systemPromptUsage
     };
 
     let success = false;

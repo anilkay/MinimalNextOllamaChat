@@ -1,8 +1,12 @@
 import { useState } from "react";
-import { useChatContext } from "../ChatContext"
+import { useChatStore } from "../stores/useChatStore";
 
 export const SystemPromptComponent: React.FC = () => {
-    const { systemPrompt, setSystemPrompt, systemPromptUsage, setSystemPromptUsage } = useChatContext();
+    const systemPrompt = useChatStore((state) => state.systemPrompt);
+    const setSystemPrompt = useChatStore((state) => state.setSystemPrompt);
+    const systemPromptUsage = useChatStore((state) => state.systemPromptUsage);
+    const setSystemPromptUsage = useChatStore((state) => state.setSystemPromptUsage);
+    
     const [localSystemPrompt, setLocalSystemPrompt] = useState(systemPrompt);
     const [localSystemPromptUsage, setLocalSystemPromptUsage] = useState(systemPromptUsage);
 

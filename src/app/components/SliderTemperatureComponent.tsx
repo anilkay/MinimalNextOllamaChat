@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { useChatContext } from "../ChatContext";
+import { useChatStore } from "../stores/useChatStore";
 
 export const SliderTemperatureComponent: React.FC = () => {
-     const { temperature,setTemperature } = useChatContext();
+     const temperature = useChatStore((state) => state.temperature);
+     const setTemperature = useChatStore((state) => state.setTemperature);
      const [localTemperature,setLocalTemperature]= useState(temperature);
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
