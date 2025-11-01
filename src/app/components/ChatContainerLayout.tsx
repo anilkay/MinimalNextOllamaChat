@@ -9,7 +9,7 @@ interface ChatLayoutProps {
     chatUpdate: number; 
 }
 
-const ChatContainerLayout: React.FC<ChatLayoutProps> = ({ chatHistory, sendMessage, chatUpdate }) => {
+const ChatContainerLayout: React.FC<ChatLayoutProps> = React.memo(({ chatHistory, sendMessage, chatUpdate }) => {
     return (
         <div className="flex flex-col h-full">
             <div className="h-[60vh] overflow-y-auto bg-gradient-to-b from-gray-800/50 via-gray-900/50 to-gray-800/50">
@@ -24,6 +24,8 @@ const ChatContainerLayout: React.FC<ChatLayoutProps> = ({ chatHistory, sendMessa
             </div>
         </div>
     );
-};
+});
+
+ChatContainerLayout.displayName = 'ChatContainerLayout';
 
 export default ChatContainerLayout;

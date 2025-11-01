@@ -1,7 +1,7 @@
 // src/app/UnifiedChatContainer.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useChatStore } from "./stores/useChatStore";
 import { showToast } from "./utils/ToastUtils";
 import ChatContainerLayout from "./components/ChatContainerLayout";
@@ -26,14 +26,14 @@ function UnifiedChatContainer({ useStreaming }: Readonly<UnifiedChatContainerPro
     setTimeout(() => setChatHistory(history), 0); // Asyncronous update
   }, [contextChatHistory]);
 
-  // Message update handler
-  const handleMessageUpdate = () => {
+  // Message update handler - memoized to prevent recreating on every render
+  const handleMessageUpdate = useCallback(() => {
     setChatHistory(chatService.getChatHistory());
     setChatUpdate(prev => prev + 1);
-  };
+  }, []);
 
-  // Send message handler
-  const sendMessage = async({ 
+  // Send message handler - memoized to prevent recreating on every render
+  const sendMessage = useCallback(async({ 
     message, 
     image 
   }: { 
@@ -77,7 +77,7 @@ function UnifiedChatContainer({ useStreaming }: Readonly<UnifiedChatContainerPro
     }
 
     return success;
-  };
+  }, [useStreaming, handleMessageUpdate]);
 
   return (
     <ChatContainerLayout 

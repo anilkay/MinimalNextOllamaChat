@@ -1,9 +1,9 @@
 "use client";
 import { ChatHistory } from "@/types/chat";
-import { FC } from "react";
+import { FC, memo } from "react";
 import { useChatStore } from "../stores/useChatStore";
 
-const ChatHistoryComponent: FC<{ chathistory: ChatHistory[] }> = ({ chathistory }) => {
+const ChatHistoryComponent: FC<{ chathistory: ChatHistory[] }> = memo(({ chathistory }) => {
     const handleExport = () => {
         const systemPrompt = useChatStore.getState().systemPrompt;
         const systemPromptUsage = useChatStore.getState().systemPromptUsage;
@@ -50,6 +50,8 @@ const ChatHistoryComponent: FC<{ chathistory: ChatHistory[] }> = ({ chathistory 
             ))}
         </div>
     );
-};
+});
+
+ChatHistoryComponent.displayName = 'ChatHistoryComponent';
 
 export default ChatHistoryComponent;
