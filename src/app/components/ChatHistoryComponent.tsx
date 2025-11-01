@@ -1,6 +1,6 @@
 "use client";
-import {ChatHistory} from "@/app/page";
-import {FC} from "react";
+import { ChatHistory } from "@/types/chat";
+import { FC } from "react";
 import { useChatStore } from "../stores/useChatStore";
 
 const exportChatHistory = (chatHistory: ChatHistory[], systemPrompt: string, systemPromptUsage: boolean) => {

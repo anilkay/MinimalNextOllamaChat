@@ -2,7 +2,7 @@
 
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
-import { ChatHistory } from '../page';
+import { ChatHistory } from '@/types/chat';
 
 interface ChatStore {
   // State
@@ -38,13 +38,13 @@ export const useChatStore = create<ChatStore>()(
         chatHistory: [],
         
         // Actions
-        setTemperature: (value) => set({ temperature: value }, false, 'setTemperature'),
-        setSeedValue: (value) => set({ seedValue: value }, false, 'setSeedValue'),
-        setSeedUsage: (value) => set({ seedUsage: value }, false, 'setSeedUsage'),
-        setSelectedModel: (value) => set({ selectedModel: value }, false, 'setSelectedModel'),
-        setSystemPrompt: (value) => set({ systemPrompt: value }, false, 'setSystemPrompt'),
-        setSystemPromptUsage: (value) => set({ systemPromptUsage: value }, false, 'setSystemPromptUsage'),
-        setChatHistory: (value) => set({ chatHistory: value }, false, 'setChatHistory'),
+        setTemperature: (value) => set({ temperature: value }),
+        setSeedValue: (value) => set({ seedValue: value }),
+        setSeedUsage: (value) => set({ seedUsage: value }),
+        setSelectedModel: (value) => set({ selectedModel: value }),
+        setSystemPrompt: (value) => set({ systemPrompt: value }),
+        setSystemPromptUsage: (value) => set({ systemPromptUsage: value }),
+        setChatHistory: (value) => set({ chatHistory: value }),
       }),
       {
         name: 'chat-storage', // name of item in localStorage

@@ -1,7 +1,7 @@
 import React from 'react';
 import ChatHistoryComponent  from './ChatHistoryComponent';
 import { SendMessageComponent } from './SendMessageComponent';
-import { ChatHistory } from '../page';
+import { ChatHistory } from '@/types/chat';
 
 interface ChatLayoutProps {
     chatHistory: ChatHistory[]; 

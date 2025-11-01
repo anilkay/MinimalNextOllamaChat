@@ -1,5 +1,5 @@
 import React from "react";
-import { ChatHistory } from "../page";
+import { ChatHistory } from "@/types/chat";
 import { useChatStore } from "../stores/useChatStore";
 
 interface ExportedChatData {

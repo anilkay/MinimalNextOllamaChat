@@ -6,7 +6,7 @@ import { useChatStore } from "./stores/useChatStore";
 import { showToast } from "./utils/ToastUtils";
 import ChatContainerLayout from "./components/ChatContainerLayout";
 import { IsModelSelected } from "./utils/ChatControlUtils";
-import { ChatHistory } from "./page";
+import { ChatHistory } from "@/types/chat";
 import { chatService } from "./Services/ChatService";
 
 interface UnifiedChatContainerProps {
