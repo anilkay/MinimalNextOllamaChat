@@ -17,13 +17,7 @@ function UnifiedChatContainer({ useStreaming }: Readonly<UnifiedChatContainerPro
   const [chatHistory, setChatHistory] = useState<ChatHistory[]>([]);
   const [chatUpdate, setChatUpdate] = useState(0);
   
-  // Use Zustand selectors for better performance
-  const temperature = useChatStore((state) => state.temperature);
-  const seedValue = useChatStore((state) => state.seedValue);
-  const seedUsage = useChatStore((state) => state.seedUsage);
-  const selectedModel = useChatStore((state) => state.selectedModel);
-  const systemPrompt = useChatStore((state) => state.systemPrompt);
-  const systemPromptUsage = useChatStore((state) => state.systemPromptUsage);
+  // Only subscribe to chatHistory since we need to react to changes
   const contextChatHistory = useChatStore((state) => state.chatHistory);
 
   // Initialize from context when component mounts
@@ -46,18 +40,21 @@ function UnifiedChatContainer({ useStreaming }: Readonly<UnifiedChatContainerPro
     message: string; 
     image: File | null 
   }) => {
-    if (!IsModelSelected(selectedModel)) {
+    // Read values from store only when needed, without subscribing
+    const state = useChatStore.getState();
+    
+    if (!IsModelSelected(state.selectedModel)) {
       showToast('error', "Please select a model first");
       return false;
     }
 
     const chatOptions = {
-      temperature: temperature,
-      seedValue: seedValue,
-      seedUsage: seedUsage,
-      selectedModel: selectedModel,
-      systemPrompt: systemPrompt,
-      systemPromptUsage: systemPromptUsage
+      temperature: state.temperature,
+      seedValue: state.seedValue,
+      seedUsage: state.seedUsage,
+      selectedModel: state.selectedModel,
+      systemPrompt: state.systemPrompt,
+      systemPromptUsage: state.systemPromptUsage
     };
 
     let success = false;
