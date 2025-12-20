@@ -1,29 +1,9 @@
 "use client";
 import {ChatHistory} from "@/app/page";
 import {FC} from "react";
-import { useChatContext } from "../ChatContext";
-import { User, Bot, Download } from 'lucide-react';
-
-const exportChatHistory = (chatHistory: ChatHistory[], systemPrompt: string, systemPromptUsage: boolean) => {
-    const exportData = {
-        chatHistory,
-        systemPrompt,
-        systemPromptUsage
-    };
-    const json = JSON.stringify(exportData, null, 2);
-    const blob = new Blob([json], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'chatHistory.json';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-};
+import { User, Bot } from 'lucide-react';
 
 const ChatHistoryComponent: FC<{ chathistory: ChatHistory[] }> = ({ chathistory }) => {
-    const { systemPrompt, systemPromptUsage } = useChatContext();
     
     if (chathistory.length === 0) {
         return (
@@ -36,17 +16,6 @@ const ChatHistoryComponent: FC<{ chathistory: ChatHistory[] }> = ({ chathistory 
 
     return (
         <div className="flex flex-col space-y-6 py-4">
-            <div className="flex justify-end">
-                <button 
-                    onClick={() => exportChatHistory(chathistory, systemPrompt(), systemPromptUsage())} 
-                    className="flex items-center gap-2 text-xs text-gray-400 hover:text-blue-400 transition-colors"
-                    title="Save Conversation"
-                >
-                    <Download size={14} />
-                    <span>Export Chat</span>
-                </button>
-            </div>
-            
             {chathistory.map((message) => (
                 <div key={message.messageNumber+message.role} className={`flex gap-4 ${message.sender === "You" ? "flex-row-reverse" : "flex-row"}`}>
                     {/* Avatar */}

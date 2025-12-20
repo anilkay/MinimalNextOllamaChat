@@ -1,6 +1,7 @@
 import React from "react";
 import { ChatHistory } from "../page";
 import { useChatContext } from "../ChatContext";
+import { Upload } from "lucide-react";
 
 interface ExportedChatData {
     chatHistory: ChatHistory[];
@@ -53,7 +54,7 @@ export const RestoreChatHistory= () => {
     };
 
     return (
-        <div className=" p-4 flex flex-col items-center gap-1">
+        <div>
             <input 
                 type="file" 
                 accept=".json" 
@@ -62,9 +63,13 @@ export const RestoreChatHistory= () => {
                 id="file-upload"
             />
             
-            <label htmlFor="file-upload" className="bg-gradient-to-b from-blue-600 to-blue-800 
-               text-white text-sm px-4 py-2 rounded cursor-pointer">
-                <span className="text-gray-200">Restore Chat History</span>
+            <label 
+                htmlFor="file-upload" 
+                className="flex items-center gap-2 w-full px-3 py-2 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg text-sm text-gray-200 transition-all group cursor-pointer"
+                title="Restore conversation from JSON"
+            >
+                <Upload size={16} className="text-gray-400 group-hover:text-blue-400 transition-colors" />
+                <span>Restore Conversation</span>
             </label>
         </div>
     );
