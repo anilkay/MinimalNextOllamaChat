@@ -129,7 +129,7 @@ export default function ModelsPage() {
                                 >
                                     <div>
                                         <h3 className="font-semibold">{model.name}</h3>
-                                        <p className="text-sm text-gray-400">Size: {model.size}</p>
+                                        <p className="text-sm text-gray-400">Size: {(model.size / (1024 ** 3)).toFixed(2)} GB</p>
                                     </div>
                                     <button
                                         onClick={() => handleDeleteModel(model.name)}
