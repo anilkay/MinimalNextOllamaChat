@@ -11,14 +11,17 @@ interface ChatLayoutProps {
 
 const ChatContainerLayout: React.FC<ChatLayoutProps> = ({ chatHistory, sendMessage, chatUpdate }) => {
     return (
-        <div className="flex flex-col h-full">
-            <div className="h-[60vh] overflow-y-auto bg-gradient-to-b from-gray-800/50 via-gray-900/50 to-gray-800/50">
-                <div className="max-w-3xl mx-auto px-4">
+        <div className="flex flex-col h-full relative">
+            {/* Chat History Area - Grows to fill space */}
+            <div className="flex-1 overflow-y-auto scroll-smooth">
+                <div className="max-w-3xl mx-auto px-4 py-6">
                     <ChatHistoryComponent chathistory={chatHistory} key={chatUpdate} />
                 </div>
             </div>
-            <div className="fixed bottom-0 left-0 right-0 h-[30vh] bg-gradient-to-t from-gray-900 via-gray-800 to-gray-900/90 border-t border-gray-700/50 p-4 backdrop-blur-sm">
-                <div className="max-w-3xl mx-auto h-full">
+            
+            {/* Input Area - Fixed at bottom */}
+            <div className="flex-shrink-0 bg-gray-900 border-t border-gray-800 p-4">
+                <div className="max-w-3xl mx-auto">
                     <SendMessageComponent onSendChatMessageAction={sendMessage} />
                 </div>
             </div>

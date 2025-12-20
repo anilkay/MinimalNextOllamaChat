@@ -11,10 +11,7 @@ export const SliderTemperatureComponent: React.FC = () => {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center space-y-4">
-            <label htmlFor="slider" className="text-gray-400 font-medium">
-                Value: <span className="font-bold">{localTemperature.toFixed(2)}</span>
-            </label>
+        <div className="flex items-center gap-2 w-full">
             <input
                 id="slider"
                 type="range"
@@ -23,8 +20,12 @@ export const SliderTemperatureComponent: React.FC = () => {
                 step="0.01"
                 value={localTemperature}
                 onChange={handleChange}
-                className="w-64 h-2 bg-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75"
+                className="flex-1 h-1.5 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                title={`Temperature: ${localTemperature.toFixed(2)}`}
             />
+            <span className="text-xs text-gray-400 font-mono w-8 text-right">
+                {localTemperature.toFixed(1)}
+            </span>
         </div>
     );
 };

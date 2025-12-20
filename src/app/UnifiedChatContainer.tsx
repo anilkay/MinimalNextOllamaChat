@@ -24,7 +24,8 @@ function UnifiedChatContainer({ useStreaming }: Readonly<UnifiedChatContainerPro
     selectedModel,
     systemPrompt,
     systemPromptUsage,
-    chatHistory: contextChatHistory
+    chatHistory: contextChatHistory,
+    setChatHistory: setContextChatHistory
   } = useChatContext();
 
   // Initialize from context when component mounts
@@ -35,7 +36,9 @@ function UnifiedChatContainer({ useStreaming }: Readonly<UnifiedChatContainerPro
 
   // Message update handler
   const handleMessageUpdate = () => {
-    setChatHistory(chatService.getChatHistory());
+    const currentHistory = chatService.getChatHistory();
+    setChatHistory(currentHistory);
+    setContextChatHistory(currentHistory);
     setChatUpdate(prev => prev + 1);
   };
 

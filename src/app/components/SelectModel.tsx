@@ -3,6 +3,7 @@
 import {useEffect, useState} from "react";
 import {GetModels, Model} from "@/app/Services/OllamaService";
 import { useChatContext } from "../ChatContext";
+import { ChevronDown, Loader2, Box } from 'lucide-react';
 
 export function SelectModel() {
     const [models, setModels] = useState<Model[]|undefined>([]);
@@ -23,33 +24,46 @@ export function SelectModel() {
         setLocalSelectedModel(model)
     };
 
+    if (loading) {
+        return (
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-800 border border-gray-700 rounded-md text-sm text-gray-400">
+                <Loader2 size={14} className="animate-spin" />
+                <span>Loading models...</span>
+            </div>
+        );
+    }
+
+    if (error) {
+        return <div className="text-red-500 text-xs">Error loading models</div>;
+    }
+
     return (
-        <div className="select-model-container w-full max-w-md mx-auto">
-            {loading ? (
-                <p className="text-gray-400">Yükleniyor...</p>
-            ) : error ? (
-                <p className="text-red-500">{error}</p>
-            ) : (
-                <select
-                    className="w-full bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-lg 
-                             px-4 py-2 text-sm border border-gray-600 
-                             focus:outline-none focus:ring-2 focus:ring-blue-500/50
-                             shadow-lg backdrop-blur-sm font-semibold tracking-wide"
-                    value={localSelectedModel}
-                    onChange={(e) => handleSelect(e.target.value)}
-                >
-                    <option value="">Model Seçin</option>
-                    {models?.map((model) => (
-                        <option 
-                            key={model.model} 
-                            value={model.name}
-                            className="bg-gray-800"
-                        >
-                            {model.name}
-                        </option>
-                    ))}
-                </select>
-            )}
+        <div className="relative min-w-[200px]">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                <Box size={14} />
+            </div>
+            <select
+                className="w-full appearance-none bg-gray-800 hover:bg-gray-700 text-gray-200 rounded-md 
+                         pl-9 pr-8 py-1.5 text-sm border border-gray-700 
+                         focus:outline-none focus:ring-1 focus:ring-blue-500/50 focus:border-blue-500/50
+                         transition-colors cursor-pointer"
+                value={localSelectedModel}
+                onChange={(e) => handleSelect(e.target.value)}
+            >
+                <option value="">Select a Model</option>
+                {models?.map((model) => (
+                    <option 
+                        key={model.model} 
+                        value={model.name}
+                        className="bg-gray-800 text-gray-200"
+                    >
+                        {model.name}
+                    </option>
+                ))}
+            </select>
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                <ChevronDown size={14} />
+            </div>
         </div>
     );
 }
