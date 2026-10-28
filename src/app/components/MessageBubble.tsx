@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Bot, Check, Copy, User } from "lucide-react";
+import { Bot, Check, ChevronDown, ChevronRight, Copy, User } from "lucide-react";
 import { ChatMessage } from "@/app/lib/types";
 import { Markdown } from "./Markdown";
 
 export function MessageBubble({ message }: { message: ChatMessage }) {
   const [copied, setCopied] = useState(false);
+  const [showReasoning, setShowReasoning] = useState(true);
   const isUser = message.role === "user";
   const showTyping = !isUser && !message.content && !message.error;
 
@@ -44,6 +45,23 @@ export function MessageBubble({ message }: { message: ChatMessage }) {
                 // eslint-disable-next-line @next/next/no-img-element -- base64 data-URL preview
                 <img key={i} src={src} alt="attachment" className="max-h-40 rounded-lg" />
               ))}
+            </div>
+          )}
+
+          {!isUser && message.reasoning && (
+            <div className="mb-2 border-l-2 border-gray-600/60 pl-3">
+              <button
+                onClick={() => setShowReasoning((s) => !s)}
+                className="flex items-center gap-1 text-xs font-medium text-gray-400 hover:text-gray-200 transition-colors"
+              >
+                {showReasoning ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+                Reasoning
+              </button>
+              {showReasoning && (
+                <div className="mt-2 text-gray-400">
+                  <Markdown content={message.reasoning} />
+                </div>
+              )}
             </div>
           )}
 

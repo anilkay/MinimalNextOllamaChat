@@ -33,6 +33,7 @@ function toOpenAiMessages(messages: ChatMessage[], config: AppConfig) {
 
 export interface StreamCallbacks {
   onToken: (token: string) => void;
+  onReasoning?: (token: string) => void;
   onDone: () => void;
 }
 
@@ -48,6 +49,7 @@ export async function streamChat(
     temperature: config.temperature,
     stream: true,
     ...(config.useSeed ? { seed: config.seed } : {}),
+    ...(config.useThinking ? { enable_thinking: true } : {}),
   };
 
   const response = await fetch("/api/chat", {
@@ -84,8 +86,13 @@ export async function streamChat(
       }
       try {
         const json = JSON.parse(data);
-        const delta = json.choices?.[0]?.delta?.content;
-        if (typeof delta === "string") callbacks.onToken(delta);
+        const delta = json.choices?.[0]?.delta;
+        const content = delta?.content;
+        const reasoning = delta?.reasoning_content ?? delta?.reasoning ?? delta?.thinking;
+        if (typeof content === "string") callbacks.onToken(content);
+        if (typeof reasoning === "string" && callbacks.onReasoning) {
+          callbacks.onReasoning(reasoning);
+        }
       } catch {
         // Ignore non-JSON keep-alive lines.
       }

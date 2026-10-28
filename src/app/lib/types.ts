@@ -4,6 +4,8 @@ export interface ChatMessage {
   id: string;
   role: Role;
   content: string;
+  /** Accumulated reasoning/thinking text (display-only, never sent back to the API). */
+  reasoning?: string;
   /** Full data URLs for attached images (e.g. data:image/png;base64,...) */
   images?: string[];
   /** Set when an error interrupted generation for this message */
@@ -19,4 +21,5 @@ export interface AppConfig {
   useSeed: boolean;
   systemPrompt: string;
   useSystemPrompt: boolean;
+  useThinking: boolean;
 }

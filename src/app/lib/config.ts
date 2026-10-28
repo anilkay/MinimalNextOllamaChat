@@ -11,6 +11,7 @@ export const DEFAULT_CONFIG: AppConfig = {
   useSeed: false,
   systemPrompt: "",
   useSystemPrompt: false,
+  useThinking: false,
 };
 
 /**

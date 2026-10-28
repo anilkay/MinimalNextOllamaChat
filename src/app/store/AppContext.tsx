@@ -100,6 +100,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         id: assistantId,
         role: "assistant",
         content: "",
+        reasoning: "",
       };
 
       setMessages((prev) => [...prev, userMessage, assistantMessage]);
@@ -117,6 +118,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               setMessages((prev) =>
                 prev.map((m) =>
                   m.id === assistantId ? { ...m, content: m.content + token } : m,
+                ),
+              );
+            },
+            onReasoning: (token) => {
+              setMessages((prev) =>
+                prev.map((m) =>
+                  m.id === assistantId
+                    ? { ...m, reasoning: (m.reasoning ?? "") + token }
+                    : m,
                 ),
               );
             },
