@@ -12,6 +12,12 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# A newer push to the same branch/tag cancels the older run, so a slow
+# build can't finish last and point `latest` back at an older image.
+concurrency:
+  group: docker-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/minimalnextollamachat
 
