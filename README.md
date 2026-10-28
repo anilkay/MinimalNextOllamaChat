@@ -1,163 +1,81 @@
-# Minimal Next.js Ollama Chat Interface
+# Swift Circuit
 
-A modern, minimalist chat interface for Ollama, built with Next.js and enhanced with Windsurf's AI assistance. This project provides a clean and intuitive way to interact with your local Ollama models.
+A modern, minimalist chat interface for **any OpenAI-compatible API**. Connect it to OpenAI, OpenRouter, Groq, LM Studio, vLLM, Ollama's `/v1` endpoint, or your own self-hosted server — all from one clean UI.
+
+Built with Next.js (App Router), React 19, Tailwind CSS, and React Markdown.
 
 ## Features
 
-- 🎨 Modern UI with gradient backgrounds and smooth animations
-- 🔄 Real-time chat interactions with Ollama models
-- 📱 Responsive design that works on all devices
-- 🛠 Complete model management:
-  - View installed models
-  - Pull new models
-  - Delete existing models
-- 🔄 Easy navigation between chat and model management
-- 🎯 Real-time model selection
+- 🎨 Modern dark UI with gradient accents and smooth animations
+- ⚡ Streaming responses (server-sent events) with a live "stop" control
+- 🔌 Works with any OpenAI-compatible endpoint — configure base URL + API key in-app
+- 📱 Responsive layout that works on all devices
+- 🛠 In-app settings, persisted to `localStorage`:
+  - Base URL and API key (with show/hide)
+  - Model selector (loaded from `/models`, with manual entry)
+  - Temperature, seed, and system prompt controls
+- 📝 Markdown rendering for assistant responses (code blocks, tables, lists)
+- 🖼️ Image attachments for vision-capable models
+- 💾 Save / restore conversations as JSON
+- 📋 Copy assistant responses to the clipboard
 
-## Prerequisites
+## Architecture
 
-- Node.js 18+ installed
-- [Ollama](https://ollama.ai) installed and running locally
-- A compatible Ollama model (e.g., llama2, mistral, etc.)
+The browser never talks to the upstream API directly. Instead, requests are proxied through two Next.js route handlers, which avoids CORS issues and keeps your key on your own server:
+
+- `POST /api/chat` → forwards to `{baseUrl}/chat/completions` and streams the SSE response back
+- `GET /api/models` → forwards to `{baseUrl}/models`
+
+Your **base URL and API key are stored in your browser's `localStorage`** and are passed to the app's own server (via request headers) for each call. They are never bundled or sent to third parties.
+
+> ⚠️ Note: because the app requires these server-side routes, a pure static export is **not** supported. Use the standalone Node server or the Docker image.
 
 ## Getting Started
-## Multi-Architecture Image Support
 
-Starting from version **0.1.7**, all Docker images support both **arm64** and **amd64** architectures. You can pull the appropriate image for your platform without specifying the architecture:
+### Prerequisites
 
-```bash
-docker pull aanilkay/minimalnextollamachat:latest
-```
-```bash
-docker pull aanilkay/minimalnextollamachat:latest_static
-```
+- Node.js 18+ (Node 20+ recommended)
 
-Docker will automatically select the correct image for your system (arm64 or amd64).
-1. Clone the repository:
-```bash
-git clone <your-repo-url>
-cd minimalnextollamachat
-```
+### Local development
 
-2. Install dependencies:
 ```bash
 npm install
-# or
-yarn install
-```
-
-3. Start Ollama server locally (make sure you have at least one model pulled)
-
-4. Run the development server:
-```bash
 npm run dev
-# or
-yarn dev
 ```
 
-5. Open [http://localhost:3000](http://localhost:3000) with your browser
+Open [http://localhost:3000](http://localhost:3000).
 
-## Getting Started with Docker
-
-You can easily run the Minimal Next Ollama Chat application using Docker. To pull the image from Docker Hub, use the following command:
+### Production
 
 ```bash
-docker pull aanilkay/minimalnextollamachat
+npm run build
+npm start
 ```
 
-After pulling the image, you can run it with Docker to start using the application.
+## Configuration
 
-## Docker Instructions
+All configuration happens in the app's sidebar:
 
-## Prerequisites
-Make sure you have [Docker](https://www.docker.com/) installed on your machine.
+1. **Base URL** — your OpenAI-compatible endpoint, e.g. `https://api.openai.com/v1`, `https://openrouter.ai/api/v1`, `https://api.groq.com/openai/v1`, `http://localhost:1234/v1` (LM Studio), or `http://localhost:11434/v1` (Ollama). If you omit `/v1` or the `https://` prefix, they are added automatically.
+2. **API Key** — optional for local servers; required for hosted providers.
+3. **Model** — select from the header dropdown (loaded from the endpoint's model list) or type an ID manually and press Enter.
 
-## Building the Docker Image
-To build the Docker image for the application, run the following command in the root of your project:
+## Docker
 
 ```bash
-docker build -t minimalnextollamachat .
+docker build -t swift-circuit .
+docker run -p 3000:3000 swift-circuit
 ```
-
-## Running the Docker Container
-Once the image is built, you can run the container using:
-
-```bash
-docker run -p 3000:3000 minimalnextollamachat
-```
-
-## Accessing the Application
-After running the container, you can access the application at `http://localhost:3000`. 
-
-## Docker Image Versions
-
-The following Docker image versions are available:
-
-- **amd64** version:
-  - `latest_amd64`
-  - `0.1.2_amd64`
-
-- **arm64** version:
-  - `latest`
-  - `0.1.2`
-
-You can pull these images using the respective tags.
-
-## Static Version
-
-If you want to use the static version of the application, you can pull the following image:
-
-```bash
-docker pull aanilkay/minimalnextollamachat:latest_static
-```
-
-## Running the Static Version
-
-To run the static version of the application, use the following command:
-
-```bash
-docker run -p 3000:80 aanilkay/minimalnextollamachat:latest_static
-```
-
-This will map port 3000 on your host to port 80 in the container.
-
-## Usage
-
-### Chat Interface
-1. Select your preferred Ollama model from the dropdown
-2. Type your message in the input field
-3. Press "Send" to send your message
-4. View the model's response in the chat history
-
-### Model Management
-1. Click "Manage Models" in the top navigation
-2. View all installed models and their sizes
-3. Pull new models:
-   - Enter the model name (e.g., llama2, mistral)
-   - Click "Pull Model" and wait for completion
-4. Delete models:
-   - Click "Delete" next to any installed model
-   - Confirm deletion when prompted
-5. Return to chat using "Back to Chat" button
 
 ## Technologies Used
 
-- [Next.js](https://nextjs.org/) - React framework
-- [Tailwind CSS](https://tailwindcss.com/) - Styling
-- [Ollama](https://ollama.ai) - Local LLM runtime
-- Windsurf - AI assistance for development
-
-## Development Notes
-
-This project was developed with the assistance of Windsurf's AI tools, which helped in creating a modern and efficient user interface. The codebase is organized into reusable components and follows React best practices.
-
-## Contributing
-
-Contributions are welcome! Feel free to submit issues and pull requests.
+- [Next.js](https://nextjs.org/) — React framework (App Router, route handlers)
+- [React 19](https://react.dev/) — UI library
+- [Tailwind CSS](https://tailwindcss.com/) — styling
+- [React Markdown](https://github.com/remarkjs/react-markdown) — markdown rendering
+- [Lucide](https://lucide.dev/) — icons
+- [React Toastify](https://fkhadra.github.io/react-toastify/) — notifications
 
 ## License
 
-MIT License - feel free to use this project however you'd like.
-
----
-*Built with Next.js and enhanced by Windsurf AI assistance*
+MIT License — feel free to use this project however you'd like.
