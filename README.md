@@ -61,6 +61,22 @@ All configuration happens in the app's sidebar:
 2. **API Key** — optional for local servers; required for hosted providers. **Key header** selects how it is sent: `Authorization: Bearer` (default) or `api-key` for Azure OpenAI / Azure AI Foundry (`Auto` picks `api-key` for `*.azure.com` hosts). For Foundry use the v1 endpoint, e.g. `https://<resource>.openai.azure.com/openai/v1`.
 3. **Model** — select from the header dropdown (loaded from the endpoint's model list) or type an ID manually and press Enter.
 
+## MCP tools
+
+The chat can use tools from [Model Context Protocol](https://modelcontextprotocol.io) servers. Add them under **MCP servers** in the sidebar:
+
+1. Click **Add MCP server** and enter a name and the server's URL (e.g. `https://example.com/mcp`). Add headers such as `Authorization: Bearer …` if the server needs them, one per line.
+2. The app connects, lists the server's tools and offers them to the model with every message. The model must support tool calling (OpenAI, most hosted providers, and Ollama/LM Studio models that support tools).
+3. When the model calls a tool, a card shows the tool and its arguments with **Run** / **Deny** buttons. Nothing runs until you approve it. You can turn on **Run tools without asking** per server, but only do that for servers whose tools can't change or send anything: tool results can contain text that tries to steer the model.
+
+Notes:
+
+- Only **HTTP** servers are supported (Streamable HTTP, falling back to the older HTTP+SSE transport). Servers that run as a local command (stdio) need an HTTP bridge such as [`mcp-proxy`](https://github.com/sparfenyuk/mcp-proxy).
+- Like the chat API, MCP requests are made by the app's server, so in Docker `localhost` means the container. Use `host.docker.internal` for servers on your machine.
+- Server URLs and headers are stored in your browser's `localStorage`, like the API key.
+- A single message can trigger up to 10 rounds of tool calls.
+- Set `ALLOWED_MCP_HOSTS` (same format as `ALLOWED_API_HOSTS` below) to limit which MCP servers the app's server will connect to.
+
 ## Docker
 
 ### Prebuilt images

@@ -13,6 +13,7 @@ export const DEFAULT_CONFIG: AppConfig = {
   systemPrompt: "",
   useSystemPrompt: false,
   reasoningEffort: "off",
+  mcpServers: [],
 };
 
 const LOCAL_HOST_PATTERN =
@@ -47,6 +48,7 @@ export function loadConfig(): AppConfig {
       useThinking?: boolean;
     };
     const config: AppConfig = { ...DEFAULT_CONFIG, ...parsed };
+    if (!Array.isArray(config.mcpServers)) config.mcpServers = [];
     // Migrate the older `useThinking` boolean to a reasoning effort level.
     if (!parsed.reasoningEffort && parsed.useThinking) {
       config.reasoningEffort = "medium";

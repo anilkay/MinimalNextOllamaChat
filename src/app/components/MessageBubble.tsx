@@ -4,12 +4,14 @@ import { useState } from "react";
 import { Bot, Check, ChevronDown, ChevronRight, Copy, User } from "lucide-react";
 import { ChatMessage } from "@/app/lib/types";
 import { Markdown } from "./Markdown";
+import { ToolCallCard } from "./ToolCallCard";
 
 export function MessageBubble({ message }: { message: ChatMessage }) {
   const [copied, setCopied] = useState(false);
   const [showReasoning, setShowReasoning] = useState(true);
   const isUser = message.role === "user";
-  const showTyping = !isUser && !message.content && !message.error;
+  const hasToolCalls = Boolean(message.toolCalls && message.toolCalls.length > 0);
+  const showTyping = !isUser && !message.content && !message.error && !hasToolCalls;
 
   const copy = async () => {
     try {
@@ -73,9 +75,13 @@ export function MessageBubble({ message }: { message: ChatMessage }) {
               <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:120ms]" />
               <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:240ms]" />
             </span>
-          ) : (
+          ) : message.content ? (
             <Markdown content={message.content} />
-          )}
+          ) : null}
+
+          {message.toolCalls?.map((call) => (
+            <ToolCallCard key={call.id} call={call} />
+          ))}
 
           {message.error && <p className="mt-2 text-xs text-red-400">{message.error}</p>}
         </div>

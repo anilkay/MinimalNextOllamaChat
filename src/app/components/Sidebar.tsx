@@ -8,6 +8,7 @@ import { TemperatureSlider } from "./TemperatureSlider";
 import { SeedControl } from "./SeedControl";
 import { ReasoningControl } from "./ReasoningControl";
 import { SystemPromptControl } from "./SystemPromptControl";
+import { McpSettings } from "./McpSettings";
 import { ChatMessage } from "@/app/lib/types";
 import { showToast } from "@/app/lib/toast";
 
@@ -107,6 +108,11 @@ export function Sidebar() {
         <section className="space-y-3">
           <SectionTitle>Connection</SectionTitle>
           <ConnectionSettings />
+        </section>
+
+        <section className="space-y-3">
+          <SectionTitle>MCP servers</SectionTitle>
+          <McpSettings />
         </section>
 
         <section className="space-y-4">

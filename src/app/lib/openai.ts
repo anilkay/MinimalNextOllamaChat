@@ -12,13 +12,51 @@ function configHeaders(config: ConnectionConfig): Record<string, string> {
   };
 }
 
+/** An OpenAI-style function definition offered to the model. */
+export interface ChatTool {
+  type: "function";
+  function: { name: string; description: string; parameters: Record<string, unknown> };
+}
+
+/** A tool call as returned by the model, before it is matched to an MCP server. */
+export interface RawToolCall {
+  id: string;
+  name: string;
+  arguments: string;
+}
+
+export interface ChatResult {
+  toolCalls: RawToolCall[];
+}
+
+type OpenAiMessage = { role: string; content: unknown; [key: string]: unknown };
+
 /** Converts internal messages into OpenAI-compatible chat messages. */
 function toOpenAiMessages(messages: ChatMessage[], config: AppConfig) {
-  const out: Array<{ role: string; content: unknown }> = [];
+  const out: OpenAiMessage[] = [];
   if (config.useSystemPrompt && config.systemPrompt.trim()) {
     out.push({ role: "system", content: config.systemPrompt });
   }
   for (const m of messages) {
+    // Only finished calls can be replayed: each needs a matching tool result message.
+    const calls = (m.toolCalls ?? []).filter(
+      (c) => c.status === "done" || c.status === "error" || c.status === "denied",
+    );
+    if (m.role === "assistant" && calls.length > 0) {
+      out.push({
+        role: "assistant",
+        content: m.content || null,
+        tool_calls: calls.map((c) => ({
+          id: c.id,
+          type: "function",
+          function: { name: c.name, arguments: c.arguments || "{}" },
+        })),
+      });
+      for (const c of calls) {
+        out.push({ role: "tool", tool_call_id: c.id, content: c.result ?? "" });
+      }
+      continue;
+    }
     // Aborted or failed replies can be left empty; many APIs reject empty assistant turns.
     if (m.role === "assistant" && !m.content.trim()) continue;
     if (m.images && m.images.length > 0) {
@@ -42,7 +80,12 @@ export interface StreamCallbacks {
   onDone: () => void;
 }
 
-function buildChatBody(config: AppConfig, messages: ChatMessage[], stream: boolean) {
+function buildChatBody(
+  config: AppConfig,
+  messages: ChatMessage[],
+  stream: boolean,
+  tools: ChatTool[],
+) {
   const reasoning = config.reasoningEffort !== "off";
   return {
     model: config.model,
@@ -53,7 +96,19 @@ function buildChatBody(config: AppConfig, messages: ChatMessage[], stream: boole
       : { temperature: config.temperature }),
     stream,
     ...(config.useSeed ? { seed: config.seed } : {}),
+    ...(tools.length > 0 ? { tools } : {}),
   };
+}
+
+/** Some providers send arguments as an object instead of a JSON string. */
+function argumentsToString(value: unknown): string {
+  if (typeof value === "string") return value;
+  if (value && typeof value === "object") return JSON.stringify(value);
+  return "";
+}
+
+function makeCallId(): string {
+  return `call_${Math.random().toString(36).slice(2, 12)}`;
 }
 
 /** Sends a non-streaming request and delivers the full reply through the same callbacks. */
@@ -62,11 +117,12 @@ export async function completeChat(
   messages: ChatMessage[],
   callbacks: StreamCallbacks,
   signal: AbortSignal,
-): Promise<void> {
+  tools: ChatTool[] = [],
+): Promise<ChatResult> {
   const response = await fetch("/api/chat", {
     method: "POST",
     headers: configHeaders(config),
-    body: JSON.stringify(buildChatBody(config, messages, false)),
+    body: JSON.stringify(buildChatBody(config, messages, false, tools)),
     signal,
   });
 
@@ -83,6 +139,18 @@ export async function completeChat(
   }
   if (typeof content === "string") callbacks.onToken(content);
   callbacks.onDone();
+
+  const rawCalls: Array<{ id?: string; function?: { name?: string; arguments?: unknown } }> =
+    Array.isArray(message?.tool_calls) ? message.tool_calls : [];
+  return {
+    toolCalls: rawCalls
+      .filter((c) => typeof c.function?.name === "string" && c.function.name)
+      .map((c) => ({
+        id: c.id || makeCallId(),
+        name: c.function!.name!,
+        arguments: argumentsToString(c.function?.arguments),
+      })),
+  };
 }
 
 export async function streamChat(
@@ -90,11 +158,12 @@ export async function streamChat(
   messages: ChatMessage[],
   callbacks: StreamCallbacks,
   signal: AbortSignal,
-): Promise<void> {
+  tools: ChatTool[] = [],
+): Promise<ChatResult> {
   const response = await fetch("/api/chat", {
     method: "POST",
     headers: configHeaders(config),
-    body: JSON.stringify(buildChatBody(config, messages, true)),
+    body: JSON.stringify(buildChatBody(config, messages, true, tools)),
     signal,
   });
 
@@ -108,6 +177,13 @@ export async function streamChat(
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   let buffer = "";
+  // Tool calls arrive in fragments keyed by `index`; the arguments string is split across chunks.
+  const calls: RawToolCall[] = [];
+  const result = (): ChatResult => ({
+    toolCalls: calls
+      .filter((c) => c && c.name)
+      .map((c) => ({ ...c, id: c.id || makeCallId() })),
+  });
 
   /** Handles one SSE line; returns true when the stream signalled `[DONE]`. */
   const handleLine = (line: string): boolean => {
@@ -124,6 +200,17 @@ export async function streamChat(
       if (typeof reasoning === "string" && callbacks.onReasoning) {
         callbacks.onReasoning(reasoning);
       }
+      if (Array.isArray(delta?.tool_calls)) {
+        for (const [position, tc] of (delta.tool_calls as Array<Record<string, unknown>>).entries()) {
+          const index = typeof tc.index === "number" ? tc.index : position;
+          const call = (calls[index] ??= { id: "", name: "", arguments: "" });
+          const fn = tc.function as { name?: string; arguments?: unknown } | undefined;
+          if (typeof tc.id === "string" && tc.id) call.id = tc.id;
+          // The name comes whole in the first fragment; some servers repeat it later.
+          if (fn?.name && !call.name) call.name = fn.name;
+          call.arguments += argumentsToString(fn?.arguments);
+        }
+      }
     } catch {
       // Ignore non-JSON keep-alive lines.
     }
@@ -139,7 +226,7 @@ export async function streamChat(
     for (const line of lines) {
       if (handleLine(line)) {
         callbacks.onDone();
-        return;
+        return result();
       }
     }
   }
@@ -147,6 +234,7 @@ export async function streamChat(
   buffer += decoder.decode();
   if (buffer) handleLine(buffer);
   callbacks.onDone();
+  return result();
 }
 
 export async function listModels(
