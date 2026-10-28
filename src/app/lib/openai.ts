@@ -49,7 +49,9 @@ export async function streamChat(
     temperature: config.temperature,
     stream: true,
     ...(config.useSeed ? { seed: config.seed } : {}),
-    ...(config.useThinking ? { enable_thinking: true } : {}),
+    ...(config.reasoningEffort !== "off"
+      ? { reasoning_effort: config.reasoningEffort }
+      : {}),
   };
 
   const response = await fetch("/api/chat", {

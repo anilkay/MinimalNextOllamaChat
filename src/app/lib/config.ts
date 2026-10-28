@@ -11,7 +11,7 @@ export const DEFAULT_CONFIG: AppConfig = {
   useSeed: false,
   systemPrompt: "",
   useSystemPrompt: false,
-  useThinking: false,
+  reasoningEffort: "off",
 };
 
 /**
@@ -31,7 +31,15 @@ export function loadConfig(): AppConfig {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return { ...DEFAULT_CONFIG };
-    return { ...DEFAULT_CONFIG, ...(JSON.parse(raw) as Partial<AppConfig>) };
+    const parsed = JSON.parse(raw) as Partial<AppConfig> & {
+      useThinking?: boolean;
+    };
+    const config: AppConfig = { ...DEFAULT_CONFIG, ...parsed };
+    // Migrate the older `useThinking` boolean to a reasoning effort level.
+    if (!parsed.reasoningEffort && parsed.useThinking) {
+      config.reasoningEffort = "medium";
+    }
+    return config;
   } catch {
     return { ...DEFAULT_CONFIG };
   }

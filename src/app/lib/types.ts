@@ -1,5 +1,7 @@
 export type Role = "system" | "user" | "assistant";
 
+export type ReasoningEffort = "off" | "low" | "medium" | "high";
+
 export interface ChatMessage {
   id: string;
   role: Role;
@@ -21,5 +23,5 @@ export interface AppConfig {
   useSeed: boolean;
   systemPrompt: string;
   useSystemPrompt: boolean;
-  useThinking: boolean;
+  reasoningEffort: ReasoningEffort;
 }

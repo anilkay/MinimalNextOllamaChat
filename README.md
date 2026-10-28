@@ -13,9 +13,9 @@ Built with Next.js (App Router), React 19, Tailwind CSS, and React Markdown.
 - 🛠 In-app settings, persisted to `localStorage`:
   - Base URL and API key (with show/hide)
   - Model selector (loaded from `/models`, with manual entry)
-  - Temperature, seed, thinking, and system prompt controls
+  - Temperature, seed, reasoning effort, and system prompt controls
 - 📝 Markdown rendering for assistant responses (code blocks, tables, lists)
-- 🧠 Thinking toggle + reasoning display for thinking-capable models (DeepSeek, Qwen, …)
+- 🧠 Reasoning effort control (Off / Low / Medium / High) + live reasoning display for reasoning models (OpenAI o-series, GPT-5, DeepSeek, …)
 - 🖼️ Image attachments for vision-capable models
 - 💾 Save / restore conversations as JSON
 - 📋 Copy assistant responses to the clipboard

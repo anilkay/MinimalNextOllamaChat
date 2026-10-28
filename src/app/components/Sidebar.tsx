@@ -6,7 +6,7 @@ import { useApp } from "@/app/store/AppContext";
 import { ConnectionSettings } from "./ConnectionSettings";
 import { TemperatureSlider } from "./TemperatureSlider";
 import { SeedControl } from "./SeedControl";
-import { ThinkingControl } from "./ThinkingControl";
+import { ReasoningControl } from "./ReasoningControl";
 import { SystemPromptControl } from "./SystemPromptControl";
 import { ChatMessage } from "@/app/lib/types";
 import { showToast } from "@/app/lib/toast";
@@ -104,7 +104,7 @@ export function Sidebar() {
           <SectionTitle>Generation</SectionTitle>
           <TemperatureSlider />
           <SeedControl />
-          <ThinkingControl />
+          <ReasoningControl />
           <SystemPromptControl />
         </section>
 
