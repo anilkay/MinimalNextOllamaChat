@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Eye, EyeOff, KeyRound, Server } from "lucide-react";
 import { useApp } from "@/app/store/AppContext";
+import { AuthHeader } from "@/app/lib/types";
 
 export function ConnectionSettings() {
   const { config, updateConfig } = useApp();
@@ -51,6 +52,22 @@ export function ConnectionSettings() {
         </div>
         <p className="text-[11px] text-gray-500">
           Stored locally in your browser and sent only to this app&apos;s server.
+        </p>
+      </div>
+
+      <div className="space-y-1.5">
+        <label className="text-xs font-medium text-gray-400">Key header</label>
+        <select
+          value={config.authHeader}
+          onChange={(e) => updateConfig({ authHeader: e.target.value as AuthHeader })}
+          className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+        >
+          <option value="auto" className="bg-gray-800 text-gray-200">Auto</option>
+          <option value="bearer" className="bg-gray-800 text-gray-200">Authorization: Bearer</option>
+          <option value="api-key" className="bg-gray-800 text-gray-200">api-key (Azure / Foundry)</option>
+        </select>
+        <p className="text-[11px] text-gray-500">
+          Auto uses <code className="text-gray-400">api-key</code> for *.azure.com hosts, Bearer otherwise.
         </p>
       </div>
     </div>

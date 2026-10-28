@@ -1,4 +1,4 @@
-# Swift Circuit
+# Minimal Next Ollama Chat
 
 A modern, minimalist chat interface for **any OpenAI-compatible API**. Connect it to OpenAI, OpenRouter, Groq, LM Studio, vLLM, Ollama's `/v1` endpoint, or your own self-hosted server — all from one clean UI.
 
@@ -57,16 +57,67 @@ npm start
 
 All configuration happens in the app's sidebar:
 
-1. **Base URL** — your OpenAI-compatible endpoint, e.g. `https://api.openai.com/v1`, `https://openrouter.ai/api/v1`, `https://api.groq.com/openai/v1`, `http://localhost:1234/v1` (LM Studio), or `http://localhost:11434/v1` (Ollama). If you omit `/v1` or the `https://` prefix, they are added automatically.
-2. **API Key** — optional for local servers; required for hosted providers.
+1. **Base URL** — your OpenAI-compatible endpoint, e.g. `https://api.openai.com/v1`, `https://openrouter.ai/api/v1`, `https://api.groq.com/openai/v1`, `http://localhost:1234/v1` (LM Studio), or `http://localhost:11434/v1` (Ollama). If you omit the protocol, `http://` is used for local/private hosts and `https://` otherwise; `/v1` is appended only when the URL has no path (so endpoints like `.../v1beta/openai` are kept as-is).
+2. **API Key** — optional for local servers; required for hosted providers. **Key header** selects how it is sent: `Authorization: Bearer` (default) or `api-key` for Azure OpenAI / Azure AI Foundry (`Auto` picks `api-key` for `*.azure.com` hosts). For Foundry use the v1 endpoint, e.g. `https://<resource>.openai.azure.com/openai/v1`.
 3. **Model** — select from the header dropdown (loaded from the endpoint's model list) or type an ID manually and press Enter.
 
 ## Docker
 
+### Prebuilt images
+
+Images for `linux/amd64` and `linux/arm64` are published to two registries:
+
+- **GitHub Container Registry** (built automatically by GitHub Actions):
+
+  ```bash
+  docker run -p 3000:3000 ghcr.io/anilkay/minimalnextollamachat:latest
+  ```
+
+- **Docker Hub** (older images, plus releases pushed manually with `GenerateDockerImage.bash`):
+
+  ```bash
+  docker run -p 3000:3000 aanilkay/minimalnextollamachat:latest
+  ```
+
+The [Docker image workflow](.github/workflows/docker.yml) builds on every pull request and pushes to GHCR only:
+
+| Trigger | GHCR tags |
+| --- | --- |
+| Push to `main` | `latest`, `sha-<short sha>` |
+| Tag `v1.2.3` | `1.2.3`, `1.2`, `sha-<short sha>` |
+| Pull request | build only, nothing pushed |
+
+It can also be run by hand from the Actions tab (**Run workflow**). To release a version:
+
 ```bash
-docker build -t swift-circuit .
-docker run -p 3000:3000 swift-circuit
+git tag v0.1.8
+git push origin v0.1.8
 ```
+
+### Build it yourself
+
+```bash
+docker build -t minimalnextollamachat .
+docker run -p 3000:3000 minimalnextollamachat
+```
+
+To build both architectures and push to Docker Hub (requires `docker login`):
+
+```bash
+./GenerateDockerImage.bash Dockerfile latest
+```
+
+Because requests are made by the server, `localhost` inside the container is the container itself, not your machine. To reach Ollama or LM Studio running on the host, use `http://host.docker.internal:11434/v1` (on Linux, add `--add-host=host.docker.internal:host-gateway` to `docker run`).
+
+### Restricting upstream hosts
+
+The proxy forwards to whatever base URL the browser sends. If the app is reachable by others, set `ALLOWED_API_HOSTS` so the server can't be used to reach arbitrary hosts on your network:
+
+```bash
+docker run -p 3000:3000 -e ALLOWED_API_HOSTS=api.openai.com,host.docker.internal:11434 minimalnextollamachat
+```
+
+Entries may be a hostname (any port) or `host:port`. When unset, all hosts are allowed.
 
 ## Technologies Used
 

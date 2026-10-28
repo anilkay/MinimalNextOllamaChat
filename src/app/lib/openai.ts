@@ -1,11 +1,14 @@
 import { AppConfig, ChatMessage } from "./types";
 import { normalizeBaseUrl } from "./config";
 
-function configHeaders(baseUrl: string, apiKey: string): Record<string, string> {
+export type ConnectionConfig = Pick<AppConfig, "baseUrl" | "apiKey" | "authHeader">;
+
+function configHeaders(config: ConnectionConfig): Record<string, string> {
   return {
     "Content-Type": "application/json",
-    "x-api-base-url": normalizeBaseUrl(baseUrl),
-    "x-api-key": apiKey.trim(),
+    "x-api-base-url": normalizeBaseUrl(config.baseUrl),
+    "x-api-key": config.apiKey.trim(),
+    "x-api-auth-header": config.authHeader,
   };
 }
 
@@ -16,6 +19,8 @@ function toOpenAiMessages(messages: ChatMessage[], config: AppConfig) {
     out.push({ role: "system", content: config.systemPrompt });
   }
   for (const m of messages) {
+    // Aborted or failed replies can be left empty; many APIs reject empty assistant turns.
+    if (m.role === "assistant" && !m.content.trim()) continue;
     if (m.images && m.images.length > 0) {
       out.push({
         role: m.role,
@@ -37,27 +42,59 @@ export interface StreamCallbacks {
   onDone: () => void;
 }
 
+function buildChatBody(config: AppConfig, messages: ChatMessage[], stream: boolean) {
+  const reasoning = config.reasoningEffort !== "off";
+  return {
+    model: config.model,
+    messages: toOpenAiMessages(messages, config),
+    // Reasoning models (o-series, GPT-5) reject any non-default temperature.
+    ...(reasoning
+      ? { reasoning_effort: config.reasoningEffort }
+      : { temperature: config.temperature }),
+    stream,
+    ...(config.useSeed ? { seed: config.seed } : {}),
+  };
+}
+
+/** Sends a non-streaming request and delivers the full reply through the same callbacks. */
+export async function completeChat(
+  config: AppConfig,
+  messages: ChatMessage[],
+  callbacks: StreamCallbacks,
+  signal: AbortSignal,
+): Promise<void> {
+  const response = await fetch("/api/chat", {
+    method: "POST",
+    headers: configHeaders(config),
+    body: JSON.stringify(buildChatBody(config, messages, false)),
+    signal,
+  });
+
+  if (!response.ok) {
+    throw new Error(await extractErrorMessage(response));
+  }
+
+  const data = await response.json();
+  const message = data?.choices?.[0]?.message;
+  const content = message?.content;
+  const reasoning = message?.reasoning_content ?? message?.reasoning ?? message?.thinking;
+  if (typeof reasoning === "string" && reasoning && callbacks.onReasoning) {
+    callbacks.onReasoning(reasoning);
+  }
+  if (typeof content === "string") callbacks.onToken(content);
+  callbacks.onDone();
+}
+
 export async function streamChat(
   config: AppConfig,
   messages: ChatMessage[],
   callbacks: StreamCallbacks,
   signal: AbortSignal,
 ): Promise<void> {
-  const body = {
-    model: config.model,
-    messages: toOpenAiMessages(messages, config),
-    temperature: config.temperature,
-    stream: true,
-    ...(config.useSeed ? { seed: config.seed } : {}),
-    ...(config.reasoningEffort !== "off"
-      ? { reasoning_effort: config.reasoningEffort }
-      : {}),
-  };
-
   const response = await fetch("/api/chat", {
     method: "POST",
-    headers: configHeaders(config.baseUrl, config.apiKey),
-    body: JSON.stringify(body),
+    headers: configHeaders(config),
+    body: JSON.stringify(buildChatBody(config, messages, true)),
     signal,
   });
 
@@ -72,6 +109,27 @@ export async function streamChat(
   const decoder = new TextDecoder();
   let buffer = "";
 
+  /** Handles one SSE line; returns true when the stream signalled `[DONE]`. */
+  const handleLine = (line: string): boolean => {
+    const trimmed = line.trim();
+    if (!trimmed.startsWith("data:")) return false;
+    const data = trimmed.slice(5).trim();
+    if (data === "[DONE]") return true;
+    try {
+      const json = JSON.parse(data);
+      const delta = json.choices?.[0]?.delta;
+      const content = delta?.content;
+      const reasoning = delta?.reasoning_content ?? delta?.reasoning ?? delta?.thinking;
+      if (typeof content === "string") callbacks.onToken(content);
+      if (typeof reasoning === "string" && callbacks.onReasoning) {
+        callbacks.onReasoning(reasoning);
+      }
+    } catch {
+      // Ignore non-JSON keep-alive lines.
+    }
+    return false;
+  };
+
   while (true) {
     const { done, value } = await reader.read();
     if (done) break;
@@ -79,36 +137,26 @@ export async function streamChat(
     const lines = buffer.split("\n");
     buffer = lines.pop() ?? "";
     for (const line of lines) {
-      const trimmed = line.trim();
-      if (!trimmed.startsWith("data:")) continue;
-      const data = trimmed.slice(5).trim();
-      if (data === "[DONE]") {
+      if (handleLine(line)) {
         callbacks.onDone();
         return;
       }
-      try {
-        const json = JSON.parse(data);
-        const delta = json.choices?.[0]?.delta;
-        const content = delta?.content;
-        const reasoning = delta?.reasoning_content ?? delta?.reasoning ?? delta?.thinking;
-        if (typeof content === "string") callbacks.onToken(content);
-        if (typeof reasoning === "string" && callbacks.onReasoning) {
-          callbacks.onReasoning(reasoning);
-        }
-      } catch {
-        // Ignore non-JSON keep-alive lines.
-      }
     }
   }
+  // The stream may end without a trailing newline (or without `[DONE]`).
+  buffer += decoder.decode();
+  if (buffer) handleLine(buffer);
   callbacks.onDone();
 }
 
 export async function listModels(
-  config: Pick<AppConfig, "baseUrl" | "apiKey">,
+  config: ConnectionConfig,
+  signal?: AbortSignal,
 ): Promise<string[]> {
   const response = await fetch("/api/models", {
     method: "GET",
-    headers: configHeaders(config.baseUrl, config.apiKey),
+    headers: configHeaders(config),
+    signal,
   });
   if (!response.ok) {
     throw new Error(await extractErrorMessage(response));

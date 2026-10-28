@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Swift Circuit",
+  title: "Minimal Next Ollama Chat",
   description: "A modern chat interface for any OpenAI-compatible API.",
 };
 

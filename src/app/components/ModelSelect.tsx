@@ -14,23 +14,39 @@ export function ModelSelect() {
   const [error, setError] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const { baseUrl, apiKey } = config;
+  const { baseUrl, apiKey, authHeader } = config;
+
+  const requestRef = useRef<AbortController | null>(null);
 
   const loadModels = useCallback(async () => {
+    // Cancel any in-flight request so a slower, older response can't overwrite this one.
+    requestRef.current?.abort();
+    const controller = new AbortController();
+    requestRef.current = controller;
     setLoading(true);
     setError(null);
     try {
-      setModels(await listModels({ baseUrl, apiKey }));
+      const result = await listModels({ baseUrl, apiKey, authHeader }, controller.signal);
+      if (!controller.signal.aborted) setModels(result);
     } catch (e) {
+      if (controller.signal.aborted) return;
       setError(e instanceof Error ? e.message : "Failed to load models");
     } finally {
-      setLoading(false);
+      if (requestRef.current === controller) {
+        requestRef.current = null;
+        setLoading(false);
+      }
     }
-  }, [baseUrl, apiKey]);
+  }, [baseUrl, apiKey, authHeader]);
 
+  // Debounce so typing a URL or key doesn't fire a request per keystroke.
   useEffect(() => {
-    if (baseUrl) loadModels();
+    if (!baseUrl) return;
+    const timer = setTimeout(loadModels, 500);
+    return () => clearTimeout(timer);
   }, [baseUrl, loadModels]);
+
+  useEffect(() => () => requestRef.current?.abort(), []);
 
   useEffect(() => {
     setDraft(config.model);

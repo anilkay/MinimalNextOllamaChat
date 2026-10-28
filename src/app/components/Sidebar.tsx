@@ -69,6 +69,15 @@ export function Sidebar() {
         const parsed = JSON.parse(reader.result as string);
         const list: unknown = Array.isArray(parsed) ? parsed : parsed?.messages;
         if (!Array.isArray(list)) throw new Error("bad format");
+        const roles = ["system", "user", "assistant"];
+        const valid = list.every(
+          (m) =>
+            m &&
+            typeof m === "object" &&
+            roles.includes((m as ChatMessage).role) &&
+            typeof (m as ChatMessage).content === "string",
+        );
+        if (!valid) throw new Error("bad format");
         const imported = list as ChatMessage[];
         importChat(
           imported.map((m) => ({
@@ -90,7 +99,7 @@ export function Sidebar() {
       <div className="p-4 border-b border-gray-800 flex items-center gap-2">
         <Sparkles size={18} className="text-blue-400" />
         <h1 className="text-lg font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-          Swift Circuit
+          Minimal Next Ollama Chat
         </h1>
       </div>
 

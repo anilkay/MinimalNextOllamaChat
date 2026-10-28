@@ -2,6 +2,12 @@ export type Role = "system" | "user" | "assistant";
 
 export type ReasoningEffort = "off" | "low" | "medium" | "high";
 
+/**
+ * How the API key is sent upstream: `Authorization: Bearer` (OpenAI and most providers)
+ * or `api-key` (Azure OpenAI / Azure AI Foundry). `auto` picks `api-key` for Azure hosts.
+ */
+export type AuthHeader = "auto" | "bearer" | "api-key";
+
 export interface ChatMessage {
   id: string;
   role: Role;
@@ -17,6 +23,7 @@ export interface ChatMessage {
 export interface AppConfig {
   baseUrl: string;
   apiKey: string;
+  authHeader: AuthHeader;
   model: string;
   temperature: number;
   seed: number;

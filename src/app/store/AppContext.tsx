@@ -11,10 +11,12 @@ import {
 } from "react";
 import { AppConfig, ChatMessage } from "@/app/lib/types";
 import { loadConfig, saveConfig } from "@/app/lib/config";
-import { streamChat } from "@/app/lib/openai";
+import { completeChat, streamChat } from "@/app/lib/openai";
 import { showToast } from "@/app/lib/toast";
 
 interface AppContextValue {
+  /** Whether replies are streamed token by token (`/chatstream`) or returned whole (`/`). */
+  streaming: boolean;
   config: AppConfig;
   updateConfig: (patch: Partial<AppConfig>) => void;
   messages: ChatMessage[];
@@ -43,7 +45,13 @@ function fileToDataUrl(file: File): Promise<string> {
   });
 }
 
-export function AppProvider({ children }: { children: React.ReactNode }) {
+export function AppProvider({
+  streaming,
+  children,
+}: {
+  streaming: boolean;
+  children: React.ReactNode;
+}) {
   const [config, setConfig] = useState<AppConfig>(() => loadConfig());
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
@@ -110,7 +118,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       abortRef.current = controller;
 
       try {
-        await streamChat(
+        const send = streaming ? streamChat : completeChat;
+        await send(
           config,
           [...messages, userMessage],
           {
@@ -149,11 +158,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         abortRef.current = null;
       }
     },
-    [config, messages, isStreaming],
+    [config, messages, isStreaming, streaming],
   );
 
   const value = useMemo<AppContextValue>(
     () => ({
+      streaming,
       config,
       updateConfig,
       messages,
@@ -163,7 +173,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       clearChat,
       importChat,
     }),
-    [config, updateConfig, messages, isStreaming, sendMessage, stop, clearChat, importChat],
+    [streaming, config, updateConfig, messages, isStreaming, sendMessage, stop, clearChat, importChat],
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

@@ -1,15 +1,7 @@
 "use client";
 
-import { AppProvider } from "@/app/store/AppContext";
-import { MainLayout } from "@/app/components/MainLayout";
-import { ChatContainer } from "@/app/components/ChatContainer";
+import { ClientChatApp } from "@/app/components/ClientChatApp";
 
 export default function Home() {
-  return (
-    <AppProvider>
-      <MainLayout>
-        <ChatContainer />
-      </MainLayout>
-    </AppProvider>
-  );
+  return <ClientChatApp streaming={false} />;
 }

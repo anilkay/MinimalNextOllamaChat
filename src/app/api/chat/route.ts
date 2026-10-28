@@ -1,19 +1,13 @@
 import { NextRequest } from "next/server";
-import { normalizeBaseUrl } from "@/app/lib/config";
+import { resolveUpstream } from "@/app/lib/upstream";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST(request: NextRequest) {
-  const baseUrl = normalizeBaseUrl(request.headers.get("x-api-base-url") ?? "");
-  const apiKey = (request.headers.get("x-api-key") ?? "").trim();
-
-  if (!baseUrl) {
-    return Response.json(
-      { error: { message: "API base URL is not configured." } },
-      { status: 400 },
-    );
-  }
+  const upstreamConfig = resolveUpstream(request);
+  if (!upstreamConfig.ok) return upstreamConfig.response;
+  const { baseUrl, headers } = upstreamConfig;
 
   let body: Record<string, unknown>;
   try {
@@ -31,9 +25,6 @@ export async function POST(request: NextRequest) {
       { status: 400 },
     );
   }
-
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
-  if (apiKey) headers.Authorization = `Bearer ${apiKey}`;
 
   let upstream: Response;
   try {
