@@ -1,18 +1,37 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Box, ChevronDown, Loader2, RefreshCw } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Box, Check, ChevronDown, Loader2, RefreshCw } from "lucide-react";
 import { useApp } from "@/app/store/AppContext";
 import { listModels } from "@/app/lib/openai";
+
+/** Lowercases and drops separators so "gpt4o" finds "gpt-4o" and "qwen2.5" finds "Qwen2.5-Coder". */
+function normalize(value: string): string {
+  return value.toLowerCase().replace(/[\s\-_.:/]+/g, "");
+}
+
+/** Every whitespace-separated word of the query must appear in the model ID. */
+function matchesQuery(model: string, query: string): boolean {
+  const target = normalize(model);
+  return query
+    .split(/\s+/)
+    .filter(Boolean)
+    .every((word) => target.includes(normalize(word)));
+}
 
 export function ModelSelect() {
   const { config, updateConfig } = useApp();
   const [models, setModels] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
-  const [draft, setDraft] = useState(config.model);
+  /** Text typed while searching; null shows the selected model and the full list. */
+  const [query, setQuery] = useState<string | null>(null);
+  /** Index of the keyboard-highlighted option, -1 for none. */
+  const [highlight, setHighlight] = useState(-1);
   const [error, setError] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
 
   const { baseUrl, apiKey, authHeader } = config;
 
@@ -48,46 +67,91 @@ export function ModelSelect() {
 
   useEffect(() => () => requestRef.current?.abort(), []);
 
-  useEffect(() => {
-    setDraft(config.model);
-  }, [config.model]);
+  const close = useCallback(() => {
+    setOpen(false);
+    setQuery(null);
+  }, []);
 
+  // Clicking outside abandons the search and shows the selected model again.
   useEffect(() => {
     function onClick(e: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setOpen(false);
+        close();
       }
     }
     document.addEventListener("mousedown", onClick);
     return () => document.removeEventListener("mousedown", onClick);
-  }, []);
+  }, [close]);
 
   const commit = (model: string) => {
-    updateConfig({ model });
-    setDraft(model);
-    setOpen(false);
+    if (model) updateConfig({ model });
+    close();
+    inputRef.current?.blur();
   };
 
-  const filtered = models.filter((m) =>
-    m.toLowerCase().includes(draft.toLowerCase()),
-  );
+  const search = query?.trim() ?? "";
+  // Offer the typed text as a custom ID when it isn't in the list. A query with spaces
+  // is a multi-word search, not an ID.
+  const showCustom = search !== "" && !/\s/.test(search) && !models.includes(search);
+  const options = useMemo(() => {
+    const filtered = search ? models.filter((m) => matchesQuery(m, search)) : models;
+    return showCustom ? [...filtered, search] : filtered;
+  }, [models, search, showCustom]);
+  const active = Math.min(highlight, options.length - 1);
+
+  // Keep the highlighted (or, on open, the selected) option visible.
+  useEffect(() => {
+    if (!open) return;
+    const index = active >= 0 ? active : options.indexOf(config.model);
+    listRef.current
+      ?.querySelector(`[data-index="${index}"]`)
+      ?.scrollIntoView({ block: "nearest" });
+  }, [open, active, options, config.model]);
+
+  const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault();
+      if (!open) setOpen(true);
+      if (options.length === 0) return;
+      const step = e.key === "ArrowDown" ? 1 : -1;
+      setHighlight((h) => {
+        const current = Math.min(h, options.length - 1);
+        if (current < 0) return step === 1 ? 0 : options.length - 1;
+        return (current + step + options.length) % options.length;
+      });
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (active >= 0) commit(options[active]);
+      else commit(search);
+    } else if (e.key === "Escape") {
+      close();
+      inputRef.current?.blur();
+    }
+  };
 
   return (
     <div ref={containerRef} className="relative w-72 max-w-full">
       <div className="flex items-center gap-1 bg-gray-800 border border-gray-700 rounded-lg px-2 focus-within:border-blue-500/60">
         <Box size={14} className="text-gray-400 shrink-0" />
         <input
-          value={draft}
+          ref={inputRef}
+          value={query ?? config.model}
           onChange={(e) => {
-            setDraft(e.target.value);
+            setQuery(e.target.value);
+            setHighlight(e.target.value.trim() ? 0 : -1);
             setOpen(true);
           }}
-          onFocus={() => setOpen(true)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") commit(draft.trim());
-            if (e.key === "Escape") setOpen(false);
+          onFocus={(e) => {
+            // Start from the full list; typing replaces the selected text.
+            e.target.select();
+            setHighlight(-1);
+            setOpen(true);
           }}
-          placeholder="Model (e.g. gpt-4o-mini)"
+          onKeyDown={onKeyDown}
+          placeholder="Search or type a model ID"
+          role="combobox"
+          aria-expanded={open}
+          aria-controls="model-options"
           className="flex-1 min-w-0 bg-transparent text-sm py-2 focus:outline-none text-gray-100 placeholder-gray-500"
         />
         <button
@@ -98,7 +162,14 @@ export function ModelSelect() {
           {loading ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
         </button>
         <button
-          onClick={() => setOpen((o) => !o)}
+          onClick={() => {
+            if (open) {
+              close();
+            } else {
+              setHighlight(-1);
+              setOpen(true);
+            }
+          }}
           title="Show models"
           className="p-1 text-gray-400 hover:text-white transition-colors"
         >
@@ -107,23 +178,51 @@ export function ModelSelect() {
       </div>
 
       {open && (
-        <div className="absolute z-20 mt-1 w-full max-h-72 overflow-y-auto bg-gray-800 border border-gray-700 rounded-lg shadow-xl">
+        <div
+          id="model-options"
+          ref={listRef}
+          role="listbox"
+          className="absolute z-20 mt-1 w-full max-h-72 overflow-y-auto bg-gray-800 border border-gray-700 rounded-lg shadow-xl"
+        >
           {loading && <div className="px-3 py-2 text-xs text-gray-400">Loading models…</div>}
           {error && <div className="px-3 py-2 text-xs text-red-400">{error}</div>}
-          {!loading && !error && filtered.length === 0 && (
+          {!loading && !error && options.length === 0 && (
             <div className="px-3 py-2 text-xs text-gray-500">
-              No models found. Type an ID and press Enter.
+              No models found. Type a model ID and press Enter.
             </div>
           )}
-          {filtered.map((m) => (
-            <button
-              key={m}
-              onClick={() => commit(m)}
-              className="block w-full text-left px-3 py-2 text-sm text-gray-200 hover:bg-gray-700 truncate"
-            >
-              {m}
-            </button>
-          ))}
+          {options.map((m, i) => {
+            const isCustom = showCustom && i === options.length - 1;
+            const isSelected = !isCustom && m === config.model;
+            return (
+              <button
+                key={isCustom ? "__custom" : m}
+                data-index={i}
+                role="option"
+                aria-selected={isSelected}
+                // Keep focus in the input so the click isn't treated as a blur.
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => commit(m)}
+                onMouseEnter={() => setHighlight(i)}
+                className={`flex items-center gap-2 w-full text-left px-3 py-2 text-sm ${
+                  i === active ? "bg-gray-700" : ""
+                } ${isCustom ? "text-gray-400 border-t border-gray-700" : "text-gray-200"}`}
+              >
+                <span className="w-3.5 shrink-0">
+                  {isSelected && <Check size={14} className="text-blue-400" />}
+                </span>
+                <span className="truncate">
+                  {isCustom ? (
+                    <>
+                      Use <span className="text-gray-200">&ldquo;{m}&rdquo;</span>
+                    </>
+                  ) : (
+                    m
+                  )}
+                </span>
+              </button>
+            );
+          })}
         </div>
       )}
     </div>
