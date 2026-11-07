@@ -16,6 +16,9 @@ export function SeedControl() {
         />
         Use seed
       </label>
+      {config.useSeed && config.apiStyle === "responses" && (
+        <p className="text-[11px] text-amber-400/80">Not sent: the Responses API has no seed.</p>
+      )}
       {config.useSeed && (
         <input
           type="number"

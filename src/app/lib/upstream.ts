@@ -56,6 +56,90 @@ export function resolveUpstream(request: NextRequest): Upstream {
   return { ok: true, baseUrl, headers };
 }
 
+interface ProxyOptions {
+  /** Upstream statuses retried with backoff (TypeSafe returns 429 and 529 when busy). */
+  retryStatuses?: number[];
+  /** Extra headers for the upstream request. */
+  headers?: Record<string, string>;
+}
+
+const MAX_ATTEMPTS = 3;
+
+function retryDelay(response: Response, attempt: number): number {
+  const seconds = Number(response.headers.get("retry-after"));
+  if (Number.isFinite(seconds) && seconds > 0) return Math.min(seconds, 10) * 1000;
+  return 500 * 2 ** attempt;
+}
+
+/**
+ * Forwards a JSON POST body to `{baseUrl}{path}`. A body with `stream: true` gets the
+ * upstream server-sent events piped back unchanged.
+ */
+export async function proxyPost(
+  request: NextRequest,
+  path: string,
+  options: ProxyOptions = {},
+): Promise<Response> {
+  const upstreamConfig = resolveUpstream(request);
+  if (!upstreamConfig.ok) return upstreamConfig.response;
+  const { baseUrl, headers } = upstreamConfig;
+
+  let body: Record<string, unknown>;
+  try {
+    body = (await request.json()) as Record<string, unknown>;
+  } catch {
+    return errorResponse("Invalid request body.", 400);
+  }
+  if (!body.model) return errorResponse("No model specified.", 400);
+
+  let upstream: Response;
+  try {
+    for (let attempt = 0; ; attempt++) {
+      upstream = await fetch(`${baseUrl}${path}`, {
+        method: "POST",
+        headers: { ...headers, ...options.headers },
+        body: JSON.stringify(body),
+        signal: request.signal,
+      });
+      if (!options.retryStatuses?.includes(upstream.status) || attempt + 1 >= MAX_ATTEMPTS) {
+        break;
+      }
+      await upstream.body?.cancel();
+      await new Promise((resolve) => setTimeout(resolve, retryDelay(upstream, attempt)));
+    }
+  } catch (err) {
+    const aborted = err instanceof Error && err.name === "AbortError";
+    return errorResponse(
+      aborted
+        ? "Request aborted."
+        : "Could not reach the API endpoint. Check the base URL and your network.",
+      aborted ? 499 : 502,
+    );
+  }
+
+  if (!upstream.ok) {
+    const text = await upstream.text();
+    return new Response(
+      text || JSON.stringify({ error: { message: `Upstream error (${upstream.status})` } }),
+      { status: upstream.status, headers: { "Content-Type": "application/json" } },
+    );
+  }
+
+  if (body.stream === true) {
+    return new Response(upstream.body, {
+      status: 200,
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache, no-transform",
+        Connection: "keep-alive",
+      },
+    });
+  }
+
+  const data = await upstream.json();
+  return Response.json(data);
+}
+
 /** Azure OpenAI / Azure AI Foundry expect the key in an `api-key` header instead of Bearer. */
 function usesApiKeyHeader(mode: string | null, baseUrl: string): boolean {
   if (mode === "api-key") return true;

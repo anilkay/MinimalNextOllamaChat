@@ -1,3 +1,6 @@
+/** The app's pages: chat without and with streaming, embeddings, and TypeSafe decisions. */
+export type Page = "chat" | "chatstream" | "embeddings" | "decide";
+
 export type Role = "system" | "user" | "assistant";
 
 export type ReasoningEffort = "off" | "low" | "medium" | "high";
@@ -7,6 +10,9 @@ export type ReasoningEffort = "off" | "low" | "medium" | "high";
  * or `api-key` (Azure OpenAI / Azure AI Foundry). `auto` picks `api-key` for Azure hosts.
  */
 export type AuthHeader = "auto" | "bearer" | "api-key";
+
+/** Which OpenAI-compatible endpoint the chat uses: `/chat/completions` or `/responses`. */
+export type ApiStyle = "chat" | "responses";
 
 export type ToolCallStatus = "pending" | "running" | "done" | "error" | "denied";
 
@@ -62,6 +68,7 @@ export interface AppConfig {
   baseUrl: string;
   apiKey: string;
   authHeader: AuthHeader;
+  apiStyle: ApiStyle;
   model: string;
   temperature: number;
   seed: number;
@@ -70,4 +77,14 @@ export interface AppConfig {
   useSystemPrompt: boolean;
   reasoningEffort: ReasoningEffort;
   mcpServers: McpServerConfig[];
+  /** Model used on the Embeddings page. */
+  embeddingModel: string;
+  /** Requested vector size; 0 leaves it to the model. */
+  embeddingDimensions: number;
+  /** TypeSafe System One connection, used on the Decide page. */
+  decisionBaseUrl: string;
+  decisionApiKey: string;
+  decisionModel: string;
+  /** Sends `TypeSafe-Danger-Zone-Long-Context: true` (262k instead of 64k tokens). */
+  decisionLongContext: boolean;
 }

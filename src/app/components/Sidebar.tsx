@@ -9,14 +9,13 @@ import { SeedControl } from "./SeedControl";
 import { ReasoningControl } from "./ReasoningControl";
 import { SystemPromptControl } from "./SystemPromptControl";
 import { McpSettings } from "./McpSettings";
-import { ChatMessage } from "@/app/lib/types";
+import { DecisionSettings } from "./DecisionSettings";
+import { ChatMessage, Page } from "@/app/lib/types";
 import { showToast } from "@/app/lib/toast";
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-      {children}
-    </h2>
+    <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{children}</h2>
   );
 }
 
@@ -38,7 +37,11 @@ function ActionButton({
         danger ? "text-red-400" : "text-gray-200"
       }`}
     >
-      <span className={danger ? "text-red-400" : "text-gray-400 group-hover:text-blue-400 transition-colors"}>
+      <span
+        className={
+          danger ? "text-red-400" : "text-gray-400 group-hover:text-blue-400 transition-colors"
+        }
+      >
         {icon}
       </span>
       <span>{children}</span>
@@ -46,7 +49,7 @@ function ActionButton({
   );
 }
 
-export function Sidebar() {
+export function Sidebar({ page }: { page: Page }) {
   const { messages, importChat, clearChat } = useApp();
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -104,46 +107,68 @@ export function Sidebar() {
         </h1>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-6">
-        <section className="space-y-3">
-          <SectionTitle>Connection</SectionTitle>
-          <ConnectionSettings />
-        </section>
+      {page === "decide" ? (
+        <div className="flex-1 overflow-y-auto p-4 space-y-6">
+          <section className="space-y-3">
+            <SectionTitle>TypeSafe connection</SectionTitle>
+            <DecisionSettings />
+          </section>
+        </div>
+      ) : page === "embeddings" ? (
+        <div className="flex-1 overflow-y-auto p-4 space-y-6">
+          <section className="space-y-3">
+            <SectionTitle>Connection</SectionTitle>
+            <ConnectionSettings showChatApi={false} />
+          </section>
+        </div>
+      ) : (
+        <div className="flex-1 overflow-y-auto p-4 space-y-6">
+          <section className="space-y-3">
+            <SectionTitle>Connection</SectionTitle>
+            <ConnectionSettings />
+          </section>
 
-        <section className="space-y-3">
-          <SectionTitle>MCP servers</SectionTitle>
-          <McpSettings />
-        </section>
+          <section className="space-y-3">
+            <SectionTitle>MCP servers</SectionTitle>
+            <McpSettings />
+          </section>
 
-        <section className="space-y-4">
-          <SectionTitle>Generation</SectionTitle>
-          <TemperatureSlider />
-          <SeedControl />
-          <ReasoningControl />
-          <SystemPromptControl />
-        </section>
+          <section className="space-y-4">
+            <SectionTitle>Generation</SectionTitle>
+            <TemperatureSlider />
+            <SeedControl />
+            <ReasoningControl />
+            <SystemPromptControl />
+          </section>
 
-        <section className="space-y-2">
-          <SectionTitle>Conversation</SectionTitle>
-          <ActionButton icon={<Download size={15} />} onClick={exportChat}>
-            Save conversation
-          </ActionButton>
-          <ActionButton icon={<Upload size={15} />} onClick={() => fileRef.current?.click()}>
-            Restore conversation
-          </ActionButton>
-          <ActionButton
-            icon={<Trash2 size={15} />}
-            onClick={() => {
-              clearChat();
-              showToast("info", "Conversation cleared");
-            }}
-            danger
-          >
-            Clear conversation
-          </ActionButton>
-          <input ref={fileRef} type="file" accept=".json" className="hidden" onChange={onImport} />
-        </section>
-      </div>
+          <section className="space-y-2">
+            <SectionTitle>Conversation</SectionTitle>
+            <ActionButton icon={<Download size={15} />} onClick={exportChat}>
+              Save conversation
+            </ActionButton>
+            <ActionButton icon={<Upload size={15} />} onClick={() => fileRef.current?.click()}>
+              Restore conversation
+            </ActionButton>
+            <ActionButton
+              icon={<Trash2 size={15} />}
+              onClick={() => {
+                clearChat();
+                showToast("info", "Conversation cleared");
+              }}
+              danger
+            >
+              Clear conversation
+            </ActionButton>
+            <input
+              ref={fileRef}
+              type="file"
+              accept=".json"
+              className="hidden"
+              onChange={onImport}
+            />
+          </section>
+        </div>
+      )}
     </aside>
   );
 }

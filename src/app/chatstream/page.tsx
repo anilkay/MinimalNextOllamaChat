@@ -3,5 +3,5 @@
 import { ClientChatApp } from "@/app/components/ClientChatApp";
 
 export default function ChatStream() {
-  return <ClientChatApp streaming={true} />;
+  return <ClientChatApp page="chatstream" />;
 }

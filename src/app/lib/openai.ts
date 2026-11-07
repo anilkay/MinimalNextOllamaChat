@@ -1,9 +1,9 @@
-import { AppConfig, ChatMessage } from "./types";
+import { AppConfig, ChatMessage, ToolCall } from "./types";
 import { normalizeBaseUrl } from "./config";
 
 export type ConnectionConfig = Pick<AppConfig, "baseUrl" | "apiKey" | "authHeader">;
 
-function configHeaders(config: ConnectionConfig): Record<string, string> {
+export function configHeaders(config: ConnectionConfig): Record<string, string> {
   return {
     "Content-Type": "application/json",
     "x-api-base-url": normalizeBaseUrl(config.baseUrl),
@@ -29,7 +29,18 @@ export interface ChatResult {
   toolCalls: RawToolCall[];
 }
 
+/** A parsed server-sent event payload. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- provider payloads are loosely typed
+export type SseEvent = Record<string, any>;
+
 type OpenAiMessage = { role: string; content: unknown; [key: string]: unknown };
+
+/** Calls that can be replayed to the model: each one has a result to send back. */
+export function finishedCalls(m: ChatMessage): ToolCall[] {
+  return (m.toolCalls ?? []).filter(
+    (c) => c.status === "done" || c.status === "error" || c.status === "denied",
+  );
+}
 
 /** Converts internal messages into OpenAI-compatible chat messages. */
 function toOpenAiMessages(messages: ChatMessage[], config: AppConfig) {
@@ -39,9 +50,7 @@ function toOpenAiMessages(messages: ChatMessage[], config: AppConfig) {
   }
   for (const m of messages) {
     // Only finished calls can be replayed: each needs a matching tool result message.
-    const calls = (m.toolCalls ?? []).filter(
-      (c) => c.status === "done" || c.status === "error" || c.status === "denied",
-    );
+    const calls = finishedCalls(m);
     if (m.role === "assistant" && calls.length > 0) {
       out.push({
         role: "assistant",
@@ -101,13 +110,13 @@ function buildChatBody(
 }
 
 /** Some providers send arguments as an object instead of a JSON string. */
-function argumentsToString(value: unknown): string {
+export function argumentsToString(value: unknown): string {
   if (typeof value === "string") return value;
   if (value && typeof value === "object") return JSON.stringify(value);
   return "";
 }
 
-function makeCallId(): string {
+export function makeCallId(): string {
   return `call_${Math.random().toString(36).slice(2, 12)}`;
 }
 
@@ -170,20 +179,49 @@ export async function streamChat(
   if (!response.ok) {
     throw new Error(await extractErrorMessage(response));
   }
-  if (!response.body) {
-    throw new Error("Empty response from server");
-  }
 
+  // Tool calls arrive in fragments keyed by `index`; the arguments string is split across chunks.
+  const calls: RawToolCall[] = [];
+
+  await readSse(response, (json) => {
+    const delta = json.choices?.[0]?.delta;
+    const content = delta?.content;
+    const reasoning = delta?.reasoning_content ?? delta?.reasoning ?? delta?.thinking;
+    if (typeof content === "string") callbacks.onToken(content);
+    if (typeof reasoning === "string" && callbacks.onReasoning) {
+      callbacks.onReasoning(reasoning);
+    }
+    if (Array.isArray(delta?.tool_calls)) {
+      for (const [position, tc] of (delta.tool_calls as Array<Record<string, unknown>>).entries()) {
+        const index = typeof tc.index === "number" ? tc.index : position;
+        const call = (calls[index] ??= { id: "", name: "", arguments: "" });
+        const fn = tc.function as { name?: string; arguments?: unknown } | undefined;
+        if (typeof tc.id === "string" && tc.id) call.id = tc.id;
+        // The name comes whole in the first fragment; some servers repeat it later.
+        if (fn?.name && !call.name) call.name = fn.name;
+        call.arguments += argumentsToString(fn?.arguments);
+      }
+    }
+  });
+
+  callbacks.onDone();
+  return {
+    toolCalls: calls.filter((c) => c && c.name).map((c) => ({ ...c, id: c.id || makeCallId() })),
+  };
+}
+
+/**
+ * Reads a server-sent event stream and passes each JSON `data:` payload to `onEvent`
+ * until the stream ends or sends `[DONE]`. Errors thrown by `onEvent` propagate.
+ */
+export async function readSse(
+  response: Response,
+  onEvent: (json: SseEvent) => void,
+): Promise<void> {
+  if (!response.body) throw new Error("Empty response from server");
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   let buffer = "";
-  // Tool calls arrive in fragments keyed by `index`; the arguments string is split across chunks.
-  const calls: RawToolCall[] = [];
-  const result = (): ChatResult => ({
-    toolCalls: calls
-      .filter((c) => c && c.name)
-      .map((c) => ({ ...c, id: c.id || makeCallId() })),
-  });
 
   /** Handles one SSE line; returns true when the stream signalled `[DONE]`. */
   const handleLine = (line: string): boolean => {
@@ -191,50 +229,33 @@ export async function streamChat(
     if (!trimmed.startsWith("data:")) return false;
     const data = trimmed.slice(5).trim();
     if (data === "[DONE]") return true;
+    let json: unknown;
     try {
-      const json = JSON.parse(data);
-      const delta = json.choices?.[0]?.delta;
-      const content = delta?.content;
-      const reasoning = delta?.reasoning_content ?? delta?.reasoning ?? delta?.thinking;
-      if (typeof content === "string") callbacks.onToken(content);
-      if (typeof reasoning === "string" && callbacks.onReasoning) {
-        callbacks.onReasoning(reasoning);
-      }
-      if (Array.isArray(delta?.tool_calls)) {
-        for (const [position, tc] of (delta.tool_calls as Array<Record<string, unknown>>).entries()) {
-          const index = typeof tc.index === "number" ? tc.index : position;
-          const call = (calls[index] ??= { id: "", name: "", arguments: "" });
-          const fn = tc.function as { name?: string; arguments?: unknown } | undefined;
-          if (typeof tc.id === "string" && tc.id) call.id = tc.id;
-          // The name comes whole in the first fragment; some servers repeat it later.
-          if (fn?.name && !call.name) call.name = fn.name;
-          call.arguments += argumentsToString(fn?.arguments);
-        }
-      }
+      json = JSON.parse(data);
     } catch {
-      // Ignore non-JSON keep-alive lines.
+      return false; // Ignore non-JSON keep-alive lines.
     }
+    if (json && typeof json === "object") onEvent(json as SseEvent);
     return false;
   };
 
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
-    const lines = buffer.split("\n");
-    buffer = lines.pop() ?? "";
-    for (const line of lines) {
-      if (handleLine(line)) {
-        callbacks.onDone();
-        return result();
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() ?? "";
+      for (const line of lines) {
+        if (handleLine(line)) return;
       }
     }
+    // The stream may end without a trailing newline (or without `[DONE]`).
+    buffer += decoder.decode();
+    if (buffer) handleLine(buffer);
+  } finally {
+    reader.cancel().catch(() => {});
   }
-  // The stream may end without a trailing newline (or without `[DONE]`).
-  buffer += decoder.decode();
-  if (buffer) handleLine(buffer);
-  callbacks.onDone();
-  return result();
 }
 
 export async function listModels(
@@ -250,18 +271,31 @@ export async function listModels(
     throw new Error(await extractErrorMessage(response));
   }
   const data = await response.json();
-  const items: Array<{ id?: string }> = Array.isArray(data?.data) ? data.data : [];
-  return items
-    .map((m) => m.id)
-    .filter((id): id is string => typeof id === "string");
+  // OpenAI: `{data: [{id}]}`; TypeSafe: `{models: [{name}]}`.
+  const items: Array<{ id?: string; name?: string }> = Array.isArray(data?.data)
+    ? data.data
+    : Array.isArray(data?.models)
+      ? data.models
+      : [];
+  return items.map((m) => m.id ?? m.name).filter((id): id is string => typeof id === "string");
 }
 
-async function extractErrorMessage(response: Response): Promise<string> {
+export async function extractErrorMessage(response: Response): Promise<string> {
   const text = await response.text();
   try {
     const json = JSON.parse(text);
     if (json?.error?.message) return json.error.message;
     if (typeof json?.message === "string") return json.message;
+    // FastAPI-style errors (TypeSafe): `{detail: "…"}` or `{detail: [{loc, msg}]}`.
+    if (typeof json?.detail === "string") return json.detail;
+    if (Array.isArray(json?.detail)) {
+      return json.detail
+        .map((d: { loc?: unknown[]; msg?: string }) => {
+          const where = Array.isArray(d.loc) ? d.loc.filter((p) => p !== "body").join(".") : "";
+          return where ? `${where}: ${d.msg}` : d.msg;
+        })
+        .join("; ");
+    }
   } catch {
     // Response body was not JSON.
   }

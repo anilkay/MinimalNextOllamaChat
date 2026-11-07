@@ -12,6 +12,7 @@ import {
 import { AppConfig, ChatMessage, McpServerConfig, McpTool, ToolCall } from "@/app/lib/types";
 import { loadConfig, saveConfig } from "@/app/lib/config";
 import { completeChat, streamChat } from "@/app/lib/openai";
+import { completeResponses, streamResponses } from "@/app/lib/responses";
 import { buildToolRegistry, callMcpTool, listMcpTools } from "@/app/lib/mcp";
 import { showToast } from "@/app/lib/toast";
 
@@ -205,7 +206,14 @@ export function AppProvider({
       let assistantId = "";
 
       try {
-        const send = streaming ? streamChat : completeChat;
+        const send =
+          config.apiStyle === "responses"
+            ? streaming
+              ? streamResponses
+              : completeResponses
+            : streaming
+              ? streamChat
+              : completeChat;
 
         for (let round = 0; ; round++) {
           assistantId = makeId();

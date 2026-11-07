@@ -34,8 +34,12 @@ export function ReasoningControl() {
         ))}
       </select>
       <p className="text-[11px] text-gray-500">
-        Sends <code className="text-gray-400">reasoning_effort</code> for reasoning models
-        (OpenAI o-series, GPT-5, …). Temperature is not sent while this is on.
+        Sends{" "}
+        <code className="text-gray-400">
+          {config.apiStyle === "responses" ? "reasoning.effort" : "reasoning_effort"}
+        </code>{" "}
+        for reasoning models (OpenAI o-series, GPT-5, …). Temperature is not sent while this is
+        on.
       </p>
     </div>
   );

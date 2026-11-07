@@ -2,8 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Box, Check, ChevronDown, Loader2, RefreshCw } from "lucide-react";
-import { useApp } from "@/app/store/AppContext";
-import { listModels } from "@/app/lib/openai";
+import { ConnectionConfig, listModels } from "@/app/lib/openai";
 
 /** Lowercases and drops separators so "gpt4o" finds "gpt-4o" and "qwen2.5" finds "Qwen2.5-Coder". */
 function normalize(value: string): string {
@@ -19,8 +18,16 @@ function matchesQuery(model: string, query: string): boolean {
     .every((word) => target.includes(normalize(word)));
 }
 
-export function ModelSelect() {
-  const { config, updateConfig } = useApp();
+export function ModelSelect({
+  connection,
+  value,
+  onChange,
+}: {
+  /** Where the model list is loaded from. */
+  connection: ConnectionConfig;
+  value: string;
+  onChange: (model: string) => void;
+}) {
   const [models, setModels] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
@@ -33,7 +40,7 @@ export function ModelSelect() {
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
-  const { baseUrl, apiKey, authHeader } = config;
+  const { baseUrl, apiKey, authHeader } = connection;
 
   const requestRef = useRef<AbortController | null>(null);
 
@@ -84,7 +91,7 @@ export function ModelSelect() {
   }, [close]);
 
   const commit = (model: string) => {
-    if (model) updateConfig({ model });
+    if (model) onChange(model);
     close();
     inputRef.current?.blur();
   };
@@ -102,11 +109,11 @@ export function ModelSelect() {
   // Keep the highlighted (or, on open, the selected) option visible.
   useEffect(() => {
     if (!open) return;
-    const index = active >= 0 ? active : options.indexOf(config.model);
+    const index = active >= 0 ? active : options.indexOf(value);
     listRef.current
       ?.querySelector(`[data-index="${index}"]`)
       ?.scrollIntoView({ block: "nearest" });
-  }, [open, active, options, config.model]);
+  }, [open, active, options, value]);
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "ArrowDown" || e.key === "ArrowUp") {
@@ -135,7 +142,7 @@ export function ModelSelect() {
         <Box size={14} className="text-gray-400 shrink-0" />
         <input
           ref={inputRef}
-          value={query ?? config.model}
+          value={query ?? value}
           onChange={(e) => {
             setQuery(e.target.value);
             setHighlight(e.target.value.trim() ? 0 : -1);
@@ -193,7 +200,7 @@ export function ModelSelect() {
           )}
           {options.map((m, i) => {
             const isCustom = showCustom && i === options.length - 1;
-            const isSelected = !isCustom && m === config.model;
+            const isSelected = !isCustom && m === value;
             return (
               <button
                 key={isCustom ? "__custom" : m}

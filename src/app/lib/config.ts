@@ -6,6 +6,7 @@ export const DEFAULT_CONFIG: AppConfig = {
   baseUrl: "https://api.openai.com/v1",
   apiKey: "",
   authHeader: "auto",
+  apiStyle: "chat",
   model: "",
   temperature: 0.7,
   seed: 0,
@@ -14,6 +15,12 @@ export const DEFAULT_CONFIG: AppConfig = {
   useSystemPrompt: false,
   reasoningEffort: "off",
   mcpServers: [],
+  embeddingModel: "",
+  embeddingDimensions: 0,
+  decisionBaseUrl: "https://api.typesafe.ai/v1",
+  decisionApiKey: "",
+  decisionModel: "jev-latest",
+  decisionLongContext: false,
 };
 
 const LOCAL_HOST_PATTERN =
