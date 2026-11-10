@@ -33,6 +33,15 @@ export function errorResponse(message: string, status: number): Response {
   return Response.json({ error: { message } }, { status });
 }
 
+/** Passes an upstream JSON body through. A body that is not JSON usually means a wrong base URL. */
+export async function forwardJson(upstream: Response): Promise<Response> {
+  try {
+    return Response.json(JSON.parse(await upstream.text()));
+  } catch {
+    return errorResponse("The API endpoint did not return JSON. Check the base URL.", 502);
+  }
+}
+
 /** Reads the upstream base URL and API key headers sent by the browser. */
 export function resolveUpstream(request: NextRequest): Upstream {
   const baseUrl = normalizeBaseUrl(request.headers.get("x-api-base-url") ?? "");
@@ -136,8 +145,7 @@ export async function proxyPost(
     });
   }
 
-  const data = await upstream.json();
-  return Response.json(data);
+  return forwardJson(upstream);
 }
 
 /** Azure OpenAI / Azure AI Foundry expect the key in an `api-key` header instead of Bearer. */

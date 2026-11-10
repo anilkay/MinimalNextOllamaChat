@@ -77,6 +77,8 @@ All configuration happens in the app's sidebar:
 | `/embeddings` | Embeddings and similarity |
 | `/decide` | TypeSafe System One decisions (Jev) |
 
+The conversation stays when you switch pages, so you can start on `/` and continue on `/chatstream`. It is kept in memory only: reloading the page clears it.
+
 ### Embeddings
 
 Pick an embedding model in the header (e.g. `text-embedding-3-small`, or `nomic-embed-text` / `bge-m3` on Ollama), enter a few texts and press **Embed**. All texts go to `/embeddings` in one request. The page shows:

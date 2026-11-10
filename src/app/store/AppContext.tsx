@@ -171,7 +171,12 @@ export function AppProvider({
 
       const images: string[] = [];
       if (image) {
-        images.push(await fileToDataUrl(image));
+        try {
+          images.push(await fileToDataUrl(image));
+        } catch {
+          showToast("error", "Could not read the image.");
+          return;
+        }
       }
 
       const userMessage: ChatMessage = {

@@ -9,7 +9,7 @@ import { ModelSelect } from "./ModelSelect";
 import { useApp } from "@/app/store/AppContext";
 import { Page } from "@/app/lib/types";
 
-const NAV: { page: Page; href: string; label: string }[] = [
+export const NAV: { page: Page; href: string; label: string }[] = [
   { page: "chat", href: "/", label: "Chat" },
   { page: "chatstream", href: "/chatstream", label: "Stream" },
   { page: "embeddings", href: "/embeddings", label: "Embeddings" },
@@ -21,6 +21,7 @@ function HeaderModelSelect({ page }: { page: Page }) {
   if (page === "decide") {
     return (
       <ModelSelect
+        key="decision"
         connection={{
           baseUrl: config.decisionBaseUrl,
           apiKey: config.decisionApiKey,

@@ -14,7 +14,6 @@ import {
 } from "lucide-react";
 import { useApp } from "@/app/store/AppContext";
 import {
-  Answer,
   DecisionQuestion,
   DecisionWorkspace,
   MAX_CHOICE_OPTIONS,
@@ -22,6 +21,7 @@ import {
   QuestionType,
   SystemOneResponse,
   buildSystemOneRequest,
+  isAnswer,
   parseState,
   runSystemOne,
 } from "@/app/lib/systemone";
@@ -180,7 +180,16 @@ function legendText(entry: unknown): string {
   return typeof entry === "string" ? entry : JSON.stringify(entry);
 }
 
-function AnswerView({ answer }: { answer: Answer }) {
+function AnswerView({ answer }: { answer: unknown }) {
+  // An answer in a shape this page does not know is shown as it came.
+  if (!isAnswer(answer)) {
+    return (
+      <pre className="font-mono text-xs text-gray-400 whitespace-pre-wrap break-words">
+        {JSON.stringify(answer, null, 2)}
+      </pre>
+    );
+  }
+
   if (answer.type === "noul") {
     const p = answer.noul;
     const verdict = p >= NOUL_YES ? "Yes" : p <= NOUL_NO ? "No" : "Unsure";
@@ -254,9 +263,9 @@ function AnswerView({ answer }: { answer: Answer }) {
               <span className="w-4 shrink-0 text-right font-mono text-gray-500">{level}</span>
               <span
                 className="w-44 shrink-0 truncate text-gray-300"
-                title={legendText(answer.legend[String(level)])}
+                title={legendText(answer.legend?.[String(level)])}
               >
-                {legendText(answer.legend[String(level)])}
+                {legendText(answer.legend?.[String(level)])}
               </span>
               <Bar value={p} highlight={level === likeliest} />
               <span className="w-10 shrink-0 text-right text-gray-400">{percent(p)}</span>
@@ -288,7 +297,8 @@ function QuestionCard({
   onRemove,
 }: {
   q: DecisionQuestion;
-  answer?: Answer;
+  /** Undefined when the last run has no answer under this question's name. */
+  answer?: unknown;
   stale: boolean;
   onChange: (patch: Partial<DecisionQuestion>) => void;
   onRemove: () => void;
@@ -444,7 +454,7 @@ function QuestionCard({
           </div>
         )}
 
-        {answer && (
+        {answer !== undefined && (
           <div
             className={`border-t border-gray-800 pt-3 ${stale ? "opacity-50" : ""}`}
             title={stale ? "Edited since the last run" : undefined}
@@ -569,6 +579,8 @@ export function DecisionPanel() {
   };
 
   const stale = ranText !== null && ranText !== requestText;
+  // A Map, so a question named "constructor" finds no inherited property.
+  const answers = new Map(Object.entries(result?.response.answers ?? {}));
 
   return (
     <div
@@ -646,7 +658,7 @@ export function DecisionPanel() {
             <QuestionCard
               key={q.uid}
               q={q}
-              answer={result?.response.answers[q.name.trim()]}
+              answer={answers.get(q.name.trim())}
               stale={stale}
               onChange={(patch) => updateQuestion(q.uid, patch)}
               onRemove={() =>

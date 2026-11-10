@@ -116,6 +116,14 @@ export function argumentsToString(value: unknown): string {
   return "";
 }
 
+/** Some providers report a failure inside a 200 body or mid-stream as `{error: …}`. */
+function payloadError(json: SseEvent | null | undefined): string | null {
+  const error = json?.error;
+  if (!error) return null;
+  if (typeof error === "string") return error;
+  return typeof error.message === "string" ? error.message : JSON.stringify(error);
+}
+
 export function makeCallId(): string {
   return `call_${Math.random().toString(36).slice(2, 12)}`;
 }
@@ -140,6 +148,8 @@ export async function completeChat(
   }
 
   const data = await response.json();
+  const failure = payloadError(data);
+  if (failure) throw new Error(failure);
   const message = data?.choices?.[0]?.message;
   const content = message?.content;
   const reasoning = message?.reasoning_content ?? message?.reasoning ?? message?.thinking;
@@ -184,6 +194,8 @@ export async function streamChat(
   const calls: RawToolCall[] = [];
 
   await readSse(response, (json) => {
+    const failure = payloadError(json);
+    if (failure) throw new Error(failure);
     const delta = json.choices?.[0]?.delta;
     const content = delta?.content;
     const reasoning = delta?.reasoning_content ?? delta?.reasoning ?? delta?.thinking;
@@ -285,6 +297,8 @@ export async function extractErrorMessage(response: Response): Promise<string> {
   try {
     const json = JSON.parse(text);
     if (json?.error?.message) return json.error.message;
+    // Ollama's native routes and some proxies send `{error: "…"}`.
+    if (typeof json?.error === "string") return json.error;
     if (typeof json?.message === "string") return json.message;
     // FastAPI-style errors (TypeSafe): `{detail: "…"}` or `{detail: [{loc, msg}]}`.
     if (typeof json?.detail === "string") return json.detail;

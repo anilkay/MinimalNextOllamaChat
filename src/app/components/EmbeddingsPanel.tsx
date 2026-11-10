@@ -151,7 +151,9 @@ export function EmbeddingsPanel() {
                 min={0}
                 value={config.embeddingDimensions || ""}
                 onChange={(e) =>
-                  updateConfig({ embeddingDimensions: Math.max(0, Number(e.target.value) || 0) })
+                  updateConfig({
+                    embeddingDimensions: Math.max(0, Math.floor(Number(e.target.value)) || 0),
+                  })
                 }
                 placeholder="default"
                 title="Only for models that support shortening (e.g. text-embedding-3-*)"

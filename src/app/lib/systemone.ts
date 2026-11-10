@@ -54,8 +54,21 @@ export type Answer =
 
 export interface SystemOneResponse {
   model: string;
-  answers: Record<string, Answer>;
+  /** Keyed by question name. Check each one with `isAnswer` before drawing it. */
+  answers: Record<string, unknown>;
   usage?: { input_tokens?: number; output_tokens?: number };
+}
+
+/** Whether an answer from the API has the fields its type is drawn from. */
+export function isAnswer(value: unknown): value is Answer {
+  if (!value || typeof value !== "object") return false;
+  const a = value as Record<string, unknown>;
+  if (a.type === "noul") return typeof a.noul === "number";
+  const distribution =
+    typeof a.confidence === "number" && !!a.probabilities && typeof a.probabilities === "object";
+  if (a.type === "choice") return typeof a.choice === "string" && distribution;
+  if (a.type === "score") return typeof a.score === "number" && distribution;
+  return false;
 }
 
 export const MAX_CHOICE_OPTIONS = 255;
@@ -86,7 +99,8 @@ export function buildSystemOneRequest(
   if (!workspace.state.trim()) errors.push("State is empty.");
   if (workspace.questions.length === 0) errors.push("Add at least one question.");
 
-  const questions: Record<string, unknown> = {};
+  // A Map, so names such as "constructor" or "__proto__" are ordinary keys.
+  const questions = new Map<string, unknown>();
   for (const [i, q] of workspace.questions.entries()) {
     const name = q.name.trim();
     const label = name || `Question ${i + 1}`;
@@ -94,7 +108,7 @@ export function buildSystemOneRequest(
       errors.push(`${label}: give it a name.`);
       continue;
     }
-    if (name in questions) {
+    if (questions.has(name)) {
       errors.push(`${label}: the name is used twice.`);
       continue;
     }
@@ -108,13 +122,13 @@ export function buildSystemOneRequest(
         errors.push(`${label}: at most ${MAX_CHOICE_OPTIONS} options.`);
       }
       if (new Set(names).size !== names.length) errors.push(`${label}: option names repeat.`);
-      questions[name] = {
+      questions.set(name, {
         type: "choice",
         ...instructions,
         criteria: Object.fromEntries(
           options.map((o) => [o.name.trim(), o.description.trim() || null]),
         ),
-      };
+      });
     } else if (q.type === "score") {
       const levels = q.levels.map((l) => l.trim());
       if (levels.length < 2) errors.push(`${label}: add at least two levels.`);
@@ -122,7 +136,7 @@ export function buildSystemOneRequest(
         errors.push(`${label}: at most ${MAX_SCORE_LEVELS} levels.`);
       }
       if (levels.some((l) => !l)) errors.push(`${label}: every level needs a description.`);
-      questions[name] = { type: "score", ...instructions, criteria: levels };
+      questions.set(name, { type: "score", ...instructions, criteria: levels });
     } else {
       const criteria: Record<string, string> = {};
       if (q.trueMeans.trim()) criteria.true = q.trueMeans.trim();
@@ -130,17 +144,21 @@ export function buildSystemOneRequest(
       if (!q.instructions.trim() && !criteria.true) {
         errors.push(`${label}: describe the condition to check.`);
       }
-      questions[name] = {
+      questions.set(name, {
         type: "noul",
         ...instructions,
         ...(Object.keys(criteria).length > 0 ? { criteria } : {}),
-      };
+      });
     }
   }
 
   if (errors.length > 0) return { errors };
   return {
-    body: { model: model.trim(), state: parseState(workspace.state).value, questions },
+    body: {
+      model: model.trim(),
+      state: parseState(workspace.state).value,
+      questions: Object.fromEntries(questions),
+    },
     errors,
   };
 }
@@ -165,7 +183,7 @@ export async function runSystemOne(
   });
   if (!response.ok) throw new Error(await extractErrorMessage(response));
   const data = (await response.json()) as SystemOneResponse;
-  if (!data || typeof data.answers !== "object") {
+  if (!data?.answers || typeof data.answers !== "object") {
     throw new Error("Unexpected response from the System One API.");
   }
   return data;

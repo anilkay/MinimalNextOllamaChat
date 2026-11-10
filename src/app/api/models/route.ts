@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { resolveUpstream } from "@/app/lib/upstream";
+import { forwardJson, resolveUpstream } from "@/app/lib/upstream";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -18,7 +18,11 @@ export async function GET(request: NextRequest) {
     });
   } catch {
     return Response.json(
-      { error: { message: "Could not reach the API endpoint. Check the base URL and your network." } },
+      {
+        error: {
+          message: "Could not reach the API endpoint. Check the base URL and your network.",
+        },
+      },
       { status: 502 },
     );
   }
@@ -31,6 +35,5 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const data = await upstream.json();
-  return Response.json(data);
+  return forwardJson(upstream);
 }
