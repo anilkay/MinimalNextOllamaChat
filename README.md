@@ -145,8 +145,8 @@ The [Docker image workflow](.github/workflows/docker.yml) builds on every pull r
 It can also be run by hand from the Actions tab (**Run workflow**). To release a version:
 
 ```bash
-git tag v0.1.8
-git push origin v0.1.8
+git tag v0.2.0
+git push origin v0.2.0
 ```
 
 ### Build it yourself
